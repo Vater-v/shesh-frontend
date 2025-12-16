@@ -3,29 +3,23 @@ package com.hmuriy.shesh
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.hmuriy.shesh.ui.WelcomeScreen
-import com.hmuriy.shesh.ui.theme.SheshTheme
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.hmuriy.shesh.ui.navigation.SheshNavGraph
+import com.hmuriy.shesh.ui.theme.SheshTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-
-//        enableEdgeToEdge()
-
-
         val splashScreen = installSplashScreen()
 
-        var isReady = false
-        splashScreen.setKeepOnScreenCondition {
-            !isReady
-        }
+        enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
         setContent {
+            // 4. Применяем тему. Она обработает цвета статус-бара.
             SheshTheme {
-                // Вместо WelcomeScreen() вызываем граф навигации
+                // 5. Запускаем граф навигации (вместо конкретного экрана)
                 SheshNavGraph()
             }
         }
