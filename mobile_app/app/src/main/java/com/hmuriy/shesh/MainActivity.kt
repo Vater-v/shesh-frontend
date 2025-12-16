@@ -1,4 +1,11 @@
-package com.hmuriy.shesh
+package com.hmuriy.shesh.ui.theme
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.hmuriy.shesh.ui.WelcomeScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -7,15 +14,10 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // Опционально: держать сплэш, пока грузятся данные (ViewModel)
-        /*
-        splashScreen.setKeepOnScreenCondition {
-            viewModel.isLoading.value // Возвращать true, пока грузится
-        }
-        */
-
         setContent {
+            // Если SheshTheme не существует, используйте MaterialTheme
             SheshTheme {
+//            MaterialTheme {
                 // Сразу показывай WelcomeScreen или MainScreen
                 WelcomeScreen()
             }
