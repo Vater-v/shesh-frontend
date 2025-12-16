@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hmuriy.shesh.ui.theme.*
 import com.hmuriy.shesh.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 
 /**
  * Функция для создания анимированной кисти (эффект перелива).
@@ -153,9 +155,19 @@ fun WelcomeScreen(
                     shape = MaterialTheme.shapes.medium,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
+                    // Добавляем иконку
+                    Icon(
+                        imageVector = Icons.Default.Email, // Или Icons.Outlined.Email
+                        contentDescription = "Email Icon",
+                        modifier = Modifier.size(24.dp),
+                        // Цвет иконки подтянется автоматически (обычно Primary или цвет текста)
+                        // Но можно задать явно, например: tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp)) // Отступ между иконкой и текстом
+
                     Text("Регистрация по email")
                 }
-
                 // TERTIARY ACTION: Вход
                 TextButton(
                     onClick = onSignInClick,

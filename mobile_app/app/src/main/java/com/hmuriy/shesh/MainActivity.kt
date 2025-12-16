@@ -7,11 +7,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.hmuriy.shesh.ui.WelcomeScreen
 import com.hmuriy.shesh.ui.theme.SheshTheme
 import androidx.activity.enableEdgeToEdge
+import com.hmuriy.shesh.ui.navigation.SheshNavGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
 
 
         val splashScreen = installSplashScreen()
@@ -24,8 +25,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SheshTheme {
-                isReady = true
-                WelcomeScreen()
+                // Вместо WelcomeScreen() вызываем граф навигации
+                SheshNavGraph()
             }
         }
     }
