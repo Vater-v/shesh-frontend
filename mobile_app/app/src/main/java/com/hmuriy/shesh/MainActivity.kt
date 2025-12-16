@@ -9,16 +9,12 @@ import com.hmuriy.shesh.ui.theme.SheshTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Вызвать ДО super.onCreate
         val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
         setContent {
-            // Если SheshTheme не существует, используйте MaterialTheme
             SheshTheme {
-//            MaterialTheme {
-                // Сразу показывай WelcomeScreen или MainScreen
                 WelcomeScreen()
             }
         }

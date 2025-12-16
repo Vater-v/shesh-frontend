@@ -56,7 +56,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun BotAppTheme(
+fun SheshTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color доступен на Android 12+, но для брендового софта
     // лучше его отключить (false), чтобы сохранить уникальный стиль.
