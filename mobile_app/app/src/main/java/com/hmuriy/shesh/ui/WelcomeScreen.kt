@@ -15,9 +15,37 @@ import com.hmuriy.shesh.ui.theme.*
 
 @Composable
 fun WelcomeScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize() // Заполняем весь экран
+    ) {
+        // --- ВЕРХНЯЯ ЧЕТВЕРТЬ (Заголовок) ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f), // Занимает 1 часть из 4 (25% экрана)
+            contentAlignment = Alignment.Center // Центрируем текст внутри этой четверти
+        ) {
+            Text(
+                text = "SHESH",
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
+        // --- ОСТАЛЬНЫЕ 3/4 (Подзаголовок) ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(3f), // Занимает 3 части из 4 (75% экрана)
+            contentAlignment = Alignment.TopCenter // Текст сверху этого блока
+        ) {
+            Text(
+                text = "Make it Shesh",
+                fontSize = 24.sp
+            )
+        }
+    }
 }
-
 
 @Preview(showBackground = true)
 @Composable
