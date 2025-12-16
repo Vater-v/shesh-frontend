@@ -31,7 +31,10 @@ sealed class Screen(val route: String) {
 @Composable
 fun SheshNavGraph(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    // Добавляем новые параметры:
+    onThemeToggle: () -> Unit,
+    isDarkTheme: Boolean
 ) {
     NavHost(
         navController = navController,
@@ -68,7 +71,11 @@ fun SheshNavGraph(
                 },
                 onSignInClick = {
                     navController.navigate(Screen.Login.route)
-                }
+                },
+                // Передаем управление темой в экран
+                onThemeToggle = onThemeToggle,
+                // Передаем текущее состояние темы (для отображения правильной иконки)
+                isDarkTheme = isDarkTheme
             )
         }
 
