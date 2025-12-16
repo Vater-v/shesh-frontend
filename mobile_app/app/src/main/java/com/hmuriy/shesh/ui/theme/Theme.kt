@@ -22,7 +22,8 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Color.Black, // Черный текст на циане читается лучше всего
     primaryContainer = SurfaceGunmetal,
     onPrimaryContainer = CyberCyan,
-
+    outline = CyberCyan,
+    outlineVariant = TextGray,
     secondary = SoftViolet,
     onSecondary = TextWhite,
     secondaryContainer = DeepViolet,

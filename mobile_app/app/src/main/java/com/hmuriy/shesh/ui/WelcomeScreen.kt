@@ -19,6 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Brush
+
+
+
 
 @Composable
 fun WelcomeScreen(
@@ -27,6 +31,10 @@ fun WelcomeScreen(
     onLoginSignUpClick: () -> Unit = {},
     onSignInClick: () -> Unit = {}
 ) {
+    val gradientColors = listOf(
+        MaterialTheme.colorScheme.primary,   // CyberCyan
+        MaterialTheme.colorScheme.secondary  // SoftViolet
+    )
     // Scaffold или Surface обеспечивает правильный фон и цвет контента
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -52,14 +60,14 @@ fun WelcomeScreen(
                     text = "SHESH",
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.primary
+                        brush = Brush.horizontalGradient(gradientColors) // Градиент вместо color
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Make it Shesh",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
 
