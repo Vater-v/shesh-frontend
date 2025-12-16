@@ -10,18 +10,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Shesh" />
-
-    <activity
-        android:name=".ui.SplashScreen"
-        android:exported="true"
         android:theme="@style/Theme.Shesh">
 
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+        <activity
+            android:name=".ui.SplashScreen"
+            android:exported="true"
+            android:theme="@style/Theme.Shesh">
 
-    </activity>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
-</manifest>
+        </activity>
+
+    </application> </manifest>
