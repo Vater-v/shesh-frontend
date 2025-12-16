@@ -1,11 +1,11 @@
-package com.hmuriy.shesh.ui.theme
+package com.hmuriy.shesh
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.hmuriy.shesh.ui.WelcomeScreen
-
+import com.hmuriy.shesh.ui.theme.SheshTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -9,6 +9,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.hmuriy.shesh.R
+import com.hmuriy.shesh.ui.theme.SheshTheme
 
 @Composable
 fun WelcomeScreen() {
@@ -27,5 +28,7 @@ fun WelcomeScreen() {
 @Preview(showBackground = true)
 @Composable
 fun WelcomeScreenPreview() {
-    WelcomeScreen()
+    SheshTheme {
+        WelcomeScreen()
+    }
 }
