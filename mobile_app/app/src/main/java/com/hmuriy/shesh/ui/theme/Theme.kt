@@ -16,63 +16,50 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// --- SHESH COLOR PALETTE ---
-
-// Primary & Brand (Неон)
-val SheshCyan = Color(0xFF00F0FF)
-val SheshMagenta = Color(0xFFBC13FE)
-val AcidGreen = Color(0xFF39FF14)
-
-// Backgrounds (Глубина)
-val DeepVoid = Color(0xFF0B0B15)
-val NightShade = Color(0xFF1A1A2E)
-
-// Text & UI
-val HoloWhite = Color(0xFFFFFFFF)
-val TechGrey = Color(0xFF8F9BB3)
-val ErrorRed = Color(0xFFFF0033)
-
-// --- MATERIAL 3 COLOR SCHEMES ---
-
+// Основная темная схема "Mastery Mode"
 private val DarkColorScheme = darkColorScheme(
-    primary = SheshCyan,
-    onPrimary = DeepVoid,
-    primaryContainer = NightShade,
-    onPrimaryContainer = SheshCyan,
+    primary = CyberCyan,
+    onPrimary = Color.Black, // Черный текст на циане читается лучше всего
+    primaryContainer = SurfaceGunmetal,
+    onPrimaryContainer = CyberCyan,
 
-    secondary = SheshMagenta,
-    onSecondary = HoloWhite,
-    secondaryContainer = SheshMagenta.copy(alpha = 0.2f),
-    onSecondaryContainer = SheshMagenta,
+    secondary = SoftViolet,
+    onSecondary = TextWhite,
+    secondaryContainer = DeepViolet,
+    onSecondaryContainer = TextWhite,
 
-    tertiary = AcidGreen,
-    onTertiary = DeepVoid,
+    tertiary = TerminalGreen, // Используем для статусов "Active"
 
-    background = DeepVoid,
-    onBackground = HoloWhite,
+    background = VoidDark,
+    onBackground = TextWhite,
 
-    surface = NightShade,
-    onSurface = HoloWhite,
-    surfaceVariant = NightShade,
-    onSurfaceVariant = TechGrey,
+    surface = SurfaceGunmetal,
+    onSurface = TextWhite,
+    surfaceVariant = SurfaceLighter,
+    onSurfaceVariant = TextGray,
 
-    error = ErrorRed,
-    onError = HoloWhite
+    error = CriticalRed,
+    onError = Color.White
 )
 
+// Светлая схема (Fallback, если пользователю очень нужно, но лучше форсировать темную)
 private val LightColorScheme = lightColorScheme(
-    primary = SheshCyan,
-    onPrimary = HoloWhite,
-    secondary = SheshMagenta,
-    background = Color(0xFFF0F2F5),
+    primary = CyberCyanDark,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE0F7FA),
+
+    background = Color(0xFFF5F5F5),
     surface = Color.White,
-    onBackground = DeepVoid,
-    onSurface = DeepVoid
+    onSurface = Color(0xFF1C222E), // Темно-серый текст
+
+    // ... остальные цвета можно адаптировать
 )
 
 @Composable
-fun SheshTheme(
+fun BotAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color доступен на Android 12+, но для брендового софта
+    // лучше его отключить (false), чтобы сохранить уникальный стиль.
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -89,14 +76,18 @@ fun SheshTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            // Красим статус бар в цвет фона для полного погружения
             window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
+
+            // Управляем иконками статус бара
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        // typography = Typography, // Раскомментируй, когда создашь файл Type.kt
+//        typography = Typography, // Не забудьте подключить моноширинный шрифт (JetBrains Mono/Fira Code)
         content = content
     )
 }
