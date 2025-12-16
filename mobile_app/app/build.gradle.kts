@@ -69,6 +69,14 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    // Хранение настроек (DataStore)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // ViewModel для Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+
+    // Расширенные иконки Material (нужны для Icons.Filled.DarkMode / LightMode)
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
 }
