@@ -1,17 +1,21 @@
 package com.hmuriy.shesh.ui.welcome
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 /**
  * ViewModel для экрана приветствия (WelcomeScreen).
- * Отвечает за логику входа через внешние провайдеры (Google) и управление состоянием UI.
+ * Отвечает за логику входа через внешние провайдеры (Google),
+ * синхронизацию с Firebase и отправку данных на собственный бэкенд.
  */
 class WelcomeViewModel : ViewModel() {
 
@@ -27,35 +31,77 @@ class WelcomeViewModel : ViewModel() {
      */
     fun handleGoogleSignIn(googleIdToken: String) {
         viewModelScope.launch {
-            // 1. Устанавливаем состояние загрузки (UI должен показать Spinner/Loader)
+            // 1. Показываем загрузку
             _uiState.value = WelcomeUiState.Loading
 
             try {
-                // Создаем учетные данные для Firebase на основе токена от Google
+                // --- ШАГ 1: Вход в Firebase ---
                 val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
                 val auth = FirebaseAuth.getInstance()
 
-                // 2. Выполняем вход в Firebase
-                auth.signInWithCredential(credential)
-                    .addOnSuccessListener { authResult ->
-                        // Успешный вход -> обновляем состояние
-                        // Firebase сам сохранит сессию, можно переходить дальше
-                        _uiState.value = WelcomeUiState.Success
-                    }
-                    .addOnFailureListener { e ->
-                        // Ошибка со стороны Firebase (например, нет сети или аккаунт заблокирован)
-                        _uiState.value = WelcomeUiState.Error(e.message ?: "Ошибка входа через Firebase")
-                    }
+                // Используем await() чтобы дождаться результата в корутине (вместо callback-ов)
+                val authResult = auth.signInWithCredential(credential).await()
+                val firebaseUser = authResult.user
+
+                if (firebaseUser == null) {
+                    throw Exception("Не удалось получить пользователя Firebase")
+                }
+
+                // --- ШАГ 2: Отправка данных на Ваш Бэкенд ---
+                // Здесь мы берем данные пользователя и токен, чтобы зарегистрировать
+                // или авторизовать его на вашем сервере.
+
+                // Примечание: Для валидации на бэкенде можно слать googleIdToken
+                // или получить свежий токен Firebase: firebaseUser.getIdToken(true).await()
+
+                val backendToken = loginToBackend(
+                    idToken = googleIdToken,
+                    email = firebaseUser.email,
+                    name = firebaseUser.displayName,
+                    photoUrl = firebaseUser.photoUrl?.toString()
+                )
+
+                // --- ШАГ 3: Сохранение сессии ---
+                // TODO: Сохраните backendToken в DataStore или SharedPreferences
+                // sessionManager.saveAuthToken(backendToken)
+                Log.d("WelcomeViewModel", "Backend token received: $backendToken")
+
+                // Успех -> UI перейдет на следующий экран
+                _uiState.value = WelcomeUiState.Success
 
             } catch (e: Exception) {
-                // 3. Обработка прочих ошибок
-                _uiState.value = WelcomeUiState.Error(e.message ?: "Непредвиденная ошибка входа")
+                // Обработка ошибок (сеть, неверный токен и т.д.)
+                Log.e("WelcomeViewModel", "Sign in error", e)
+                _uiState.value = WelcomeUiState.Error(e.message ?: "Ошибка авторизации")
             }
         }
     }
 
     /**
-     * Сброс состояния (например, если пользователь нажал "ОК" на диалоге ошибки).
+     * Заглушка для вызова API вашего бэкенда.
+     * В будущем замените этот код на вызов Retrofit.
+     */
+    private suspend fun loginToBackend(
+        idToken: String,
+        email: String?,
+        name: String?,
+        photoUrl: String?
+    ): String {
+        // Эмуляция сетевой задержки
+        delay(1500)
+
+        // TODO: Реализовать запрос к API:
+        // val response = apiService.authWithGoogle(
+        //     AuthRequest(token = idToken, email = email, name = name, avatar = photoUrl)
+        // )
+        // return response.token
+
+        // Пока возвращаем фейковый токен
+        return "mock_backend_jwt_token_example_12345"
+    }
+
+    /**
+     * Сброс состояния (например, при выходе или ошибке).
      */
     fun resetState() {
         _uiState.value = WelcomeUiState.Idle
@@ -66,15 +112,8 @@ class WelcomeViewModel : ViewModel() {
  * Описание возможных состояний экрана Welcome.
  */
 sealed interface WelcomeUiState {
-    // Режим ожидания (пользователь ничего не нажал)
     data object Idle : WelcomeUiState
-
-    // Идет процесс входа (показать ProgressBar)
     data object Loading : WelcomeUiState
-
-    // Вход выполнен успешно (команда для навигации)
     data object Success : WelcomeUiState
-
-    // Произошла ошибка (показать SnackBar или Dialog)
     data class Error(val message: String) : WelcomeUiState
 }

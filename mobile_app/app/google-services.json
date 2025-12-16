@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "325529913880",
+    "project_id": "shesh-e3ae0",
+    "storage_bucket": "shesh-e3ae0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325529913880:android:ae211f6c666c40a028d16d",
+        "android_client_info": {
+          "package_name": "com.hmuriy.shesh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwU-NQc-F2kJQ-7RzeezHFRlmPeWuizVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
