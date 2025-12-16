@@ -65,5 +65,10 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     implementation("androidx.core:core-splashscreen:1.0.1")
 }

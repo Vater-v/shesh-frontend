@@ -2,7 +2,8 @@ package com.hmuriy.shesh.ui.welcome
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,27 +22,34 @@ class WelcomeViewModel : ViewModel() {
     val uiState: StateFlow<WelcomeUiState> = _uiState.asStateFlow()
 
     /**
-     * Обработка нажатия на кнопку "Войти через Google".
+     * Обработка входа через Google.
+     * @param googleIdToken Токен, полученный от Google Credential Manager в UI.
      */
-    fun handleGoogleSignIn() {
+    fun handleGoogleSignIn(googleIdToken: String) {
         viewModelScope.launch {
             // 1. Устанавливаем состояние загрузки (UI должен показать Spinner/Loader)
             _uiState.value = WelcomeUiState.Loading
 
             try {
-                // TODO: ИНТЕГРАЦИЯ С GOOGLE AUTH
-                // Здесь должен быть реальный вызов вашего репозитория или Google SignIn Client.
-                // Например: val user = authRepository.signInWithGoogle(idToken)
+                // Создаем учетные данные для Firebase на основе токена от Google
+                val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+                val auth = FirebaseAuth.getInstance()
 
-                // --- Имитация сетевой задержки (удалить при реализации) ---
-                delay(2000)
-                // ---------------------------------------------------------
+                // 2. Выполняем вход в Firebase
+                auth.signInWithCredential(credential)
+                    .addOnSuccessListener { authResult ->
+                        // Успешный вход -> обновляем состояние
+                        // Firebase сам сохранит сессию, можно переходить дальше
+                        _uiState.value = WelcomeUiState.Success
+                    }
+                    .addOnFailureListener { e ->
+                        // Ошибка со стороны Firebase (например, нет сети или аккаунт заблокирован)
+                        _uiState.value = WelcomeUiState.Error(e.message ?: "Ошибка входа через Firebase")
+                    }
 
-                // 2. Успешный вход
-                _uiState.value = WelcomeUiState.Success
             } catch (e: Exception) {
-                // 3. Обработка ошибки
-                _uiState.value = WelcomeUiState.Error(e.message ?: "Ошибка входа через Google")
+                // 3. Обработка прочих ошибок
+                _uiState.value = WelcomeUiState.Error(e.message ?: "Непредвиденная ошибка входа")
             }
         }
     }

@@ -1,27 +1,37 @@
 package com.hmuriy.shesh.ui.welcome
 
+import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hmuriy.shesh.ui.theme.*
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.hmuriy.shesh.R
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.outlined.Email
+import com.hmuriy.shesh.ui.theme.*
+import kotlinx.coroutines.launch
 
 /**
  * Функция для создания анимированной кисти (эффект перелива).
@@ -66,11 +76,21 @@ fun rememberAnimatedBrush(): Brush {
 
 @Composable
 fun WelcomeScreen(
-    onGoogleSignUpClick: () -> Unit = {},
+    // Изменили: теперь мы ожидаем не просто клик, а успешный вход с токеном
+    onGoogleSignInSuccess: (String) -> Unit = {},
     onLoginSignUpClick: () -> Unit = {},
     onSignInClick: () -> Unit = {}
 ) {
-    // Surface обеспечивает правильный фон на весь экран (включая области под системными барами)
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // Инициализация Credential Manager
+    val credentialManager = remember { CredentialManager.create(context) }
+
+    // Получаем Web Client ID из ресурсов (не забудьте добавить его в strings.xml!)
+    // Если его нет, приложение упадет, поэтому лучше использовать runCatching или проверить наличие
+    val webClientId = stringResource(id = R.string.web_client_id)
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -78,9 +98,6 @@ fun WelcomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-                // systemBarsPadding() добавляет отступы, равные высоте статус-бара и нав-бара.
-                // Это гарантирует, что контент внутри Column не будет перекрыт системным интерфейсом.
                 .systemBarsPadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -119,7 +136,43 @@ fun WelcomeScreen(
             ) {
                 // PRIMARY ACTION: Google
                 Button(
-                    onClick = onGoogleSignUpClick,
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                // 1. Настройка опции входа через Google
+                                val googleIdOption = GetGoogleIdOption.Builder()
+                                    .setFilterByAuthorizedAccounts(false) // Показываем все аккаунты
+                                    .setServerClientId(webClientId) // ВАЖНО: Web Client ID
+                                    .setAutoSelectEnabled(true) // Авто-выбор, если возможен
+                                    .build()
+
+                                // 2. Создание запроса
+                                val request = GetCredentialRequest.Builder()
+                                    .addCredentialOption(googleIdOption)
+                                    .build()
+
+                                // 3. Запуск системного диалога
+                                val result = credentialManager.getCredential(
+                                    request = request,
+                                    context = context
+                                )
+
+                                // 4. Обработка результата
+                                val credential = result.credential
+                                if (credential is GoogleIdTokenCredential) {
+                                    // Успех! Передаем токен во ViewModel (через навигацию)
+                                    onGoogleSignInSuccess(credential.idToken)
+                                } else {
+                                    Log.e("WelcomeScreen", "Unexpected credential type")
+                                }
+                            } catch (e: GetCredentialException) {
+                                // Пользователь отменил вход или произошла ошибка
+                                Log.e("WelcomeScreen", "Google Sign-In failed", e)
+                            } catch (e: Exception) {
+                                Log.e("WelcomeScreen", "Error", e)
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -177,6 +230,7 @@ fun WelcomeScreen(
 @Composable
 fun WelcomeScreenPreview() {
     SheshTheme {
+        // Для превью передаем пустые лямбды
         WelcomeScreen()
     }
 }
