@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hmuriy.shesh.ui.theme.*
+import com.hmuriy.shesh.R
 
 /**
  * Функция для создания анимированной кисти (эффект перелива).
@@ -131,16 +132,18 @@ fun WelcomeScreen(
                         .height(56.dp),
                     shape = MaterialTheme.shapes.medium
                 ) {
-                    // Используем стандартную иконку или свою из ресурсов
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_add),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        // Ссылаемся на созданный файл
+                        painter = painterResource(id = R.drawable.ic_google_logo),
+                        contentDescription = "Google Logo",
+                        // Размер чуть больше, чем у стандартных иконок, для логотипов это нормально
+                        modifier = Modifier.size(24.dp),
+                        // ВАЖНО: Unspecified, чтобы Compose не перекрашивал иконку в цвет текста
+                        tint = Color.Unspecified
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Продолжить через Google")
                 }
-
                 // SECONDARY ACTION: Email
                 OutlinedButton(
                     onClick = onLoginSignUpClick,
