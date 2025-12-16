@@ -40,7 +40,8 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = TextGray,
 
     error = CriticalRed,
-    onError = Color.White
+    onError = Color.White,
+
 )
 
 // Светлая схема (Fallback, если пользователю очень нужно, но лучше форсировать темную)
@@ -59,8 +60,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun SheshTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color доступен на Android 12+, но для брендового софта
-    // лучше его отключить (false), чтобы сохранить уникальный стиль.
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -77,18 +76,28 @@ fun SheshTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Красим статус бар в цвет фона для полного погружения
-            window.statusBarColor = colorScheme.background.toArgb()
-            window.navigationBarColor = colorScheme.background.toArgb()
 
-            // Управляем иконками статус бара
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+            // Делаем статус-бар прозрачным.
+            // Теперь цвет фона (VoidDark из Scaffold/Surface) будет виден сквозь него.
+            window.statusBarColor = Color.Transparent.toArgb()
+
+            // Навигационный бар тоже часто делают прозрачным для полного Edge-to-Edge,
+            // либо оставляют залитым цветом фона (как у вас было).
+            // Если хотите, чтобы контент заезжал и под кнопки навигации, ставьте Transparent.
+            window.navigationBarColor = colorScheme.background.toArgb()
+            // -----------------------
+
+            // Управляем цветом иконок (светлые/темные)
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-//        typography = Typography, // Не забудьте подключить моноширинный шрифт (JetBrains Mono/Fira Code)
+        // typography = Typography,
         content = content
     )
 }

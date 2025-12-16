@@ -1,40 +1,81 @@
 package com.hmuriy.shesh.ui
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hmuriy.shesh.ui.theme.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Button
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.Brush
 
+/**
+ * Функция для создания анимированной кисти (эффект перелива).
+ * Цвета циклично перетекают, создавая эффект "жидкого неона".
+ * Исправлено: Размеры привязаны к Density (dp), чтобы корректно отображаться на разных экранах.
+ */
+@Composable
+fun rememberAnimatedBrush(): Brush {
+    val density = LocalDensity.current
 
+    // Вычисляем размеры в пикселях на основе DP
+    // distancePx - насколько далеко уходит градиент (длина цикла)
+    // gradientWidthPx - физическая ширина самой цветовой полосы
+    val (distancePx, gradientWidthPx) = with(density) {
+        Pair(3000.dp.toPx(), 500.dp.toPx())
+    }
 
+    // 1. Определяем цвета для перелива.
+    val shimmerColors = listOf(
+        CyberCyan,          // Начало
+        DeepViolet,         // Глубина
+        Color(0xFFBC13FE),  // Яркая вспышка (Magenta)
+        CyberCyan           // Конец (замыкаем круг)
+    )
+
+    // 2. Настраиваем бесконечную анимацию
+    val transition = rememberInfiniteTransition(label = "shimmer_transition")
+
+    // Анимируем значение смещения (offset)
+    val translateAnimation by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = distancePx, // Используем вычисленное значение (зависит от DPI)
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 12000,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer_offset"
+    )
+
+    // 3. Создаем градиент, который сдвигается по диагонали
+    return Brush.linearGradient(
+        colors = shimmerColors,
+        start = Offset(translateAnimation, translateAnimation),
+        // Ширина градиента теперь тоже зависит от DPI, сохраняя пропорции
+        end = Offset(translateAnimation + gradientWidthPx, translateAnimation + gradientWidthPx),
+        tileMode = TileMode.Mirror
+    )
+}
 
 @Composable
 fun WelcomeScreen(
-    // Добавляем " = {}" к каждому параметру
     onGoogleSignUpClick: () -> Unit = {},
     onLoginSignUpClick: () -> Unit = {},
     onSignInClick: () -> Unit = {}
 ) {
-    val gradientColors = listOf(
-        MaterialTheme.colorScheme.primary,   // CyberCyan
-        MaterialTheme.colorScheme.secondary  // SoftViolet
-    )
     // Scaffold или Surface обеспечивает правильный фон и цвет контента
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -43,24 +84,27 @@ fun WelcomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // Учитываем системные отступы (status bar, nav bar), чтобы контент не перекрывался
+                // Учитываем системные отступы (status bar, nav bar)
                 .systemBarsPadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             // --- БЛОК БРЕНДИНГА ---
-            // Используем weight, чтобы логотип был визуально выше центра, но плавал при изменении экрана
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Получаем нашу анимированную кисть
+                val animatedBrush = rememberAnimatedBrush()
+
                 Text(
                     text = "SHESH",
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontWeight = FontWeight.Black,
-                        brush = Brush.horizontalGradient(gradientColors) // Градиент вместо color
+                        // Применяем "жидкий неон" вместо статического цвета
+                        brush = animatedBrush
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -72,16 +116,14 @@ fun WelcomeScreen(
             }
 
             // --- БЛОК ДЕЙСТВИЙ ---
-            // Нижняя часть экрана с кнопками
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp), // Отступ от нижнего края (над навигацией)
-                verticalArrangement = Arrangement.spacedBy(12.dp), // Единый отступ между элементами
+                    .padding(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // PRIMARY ACTION: Самое желаемое действие (Google)
-                // Выделяем цветом, добавляем иконку для узнаваемости
+                // PRIMARY ACTION: Google
                 Button(
                     onClick = onGoogleSignUpClick,
                     modifier = Modifier
@@ -89,9 +131,9 @@ fun WelcomeScreen(
                         .height(56.dp),
                     shape = MaterialTheme.shapes.medium
                 ) {
-                    //  - обычно здесь Icon
+                    // Используем стандартную иконку или свою из ресурсов
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_add), // Заглушка
+                        painter = painterResource(id = android.R.drawable.ic_menu_add),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -99,9 +141,7 @@ fun WelcomeScreen(
                     Text("Продолжить через Google")
                 }
 
-                // SECONDARY ACTION: Альтернатива
-                // Используем Outlined или Tonal Button, чтобы снизить визуальный шум.
-                // Если все кнопки "жирные", глаз теряется.
+                // SECONDARY ACTION: Email
                 OutlinedButton(
                     onClick = onLoginSignUpClick,
                     modifier = Modifier
@@ -113,7 +153,7 @@ fun WelcomeScreen(
                     Text("Регистрация по email")
                 }
 
-                // TERTIARY ACTION: Вход для существующих
+                // TERTIARY ACTION: Вход
                 TextButton(
                     onClick = onSignInClick,
                     modifier = Modifier.padding(top = 8.dp)
