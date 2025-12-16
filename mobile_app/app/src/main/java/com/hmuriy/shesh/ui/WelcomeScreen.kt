@@ -22,9 +22,10 @@ import androidx.compose.ui.res.painterResource
 
 @Composable
 fun WelcomeScreen(
-    onGoogleSignUpClick: () -> Unit,
-    onLoginSignUpClick: () -> Unit,
-    onSignInClick: () -> Unit
+    // Добавляем " = {}" к каждому параметру
+    onGoogleSignUpClick: () -> Unit = {},
+    onLoginSignUpClick: () -> Unit = {},
+    onSignInClick: () -> Unit = {}
 ) {
     // Scaffold или Surface обеспечивает правильный фон и цвет контента
     Surface(
