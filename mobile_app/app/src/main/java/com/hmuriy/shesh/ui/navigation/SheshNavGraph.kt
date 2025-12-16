@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.hmuriy.shesh.ui.WelcomeScreen
+import com.hmuriy.shesh.ui.welcome.WelcomeScreen
 import com.hmuriy.shesh.ui.welcome.WelcomeUiState
 import com.hmuriy.shesh.ui.welcome.WelcomeViewModel
 import androidx.compose.material3.Text

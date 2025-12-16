@@ -1,4 +1,4 @@
-package com.hmuriy.shesh.ui
+package com.hmuriy.shesh.ui.welcome
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -21,38 +21,31 @@ import com.hmuriy.shesh.ui.theme.*
 import com.hmuriy.shesh.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.outlined.Email
 
 /**
  * Функция для создания анимированной кисти (эффект перелива).
- * Цвета циклично перетекают, создавая эффект "жидкого неона".
- * Исправлено: Размеры привязаны к Density (dp), чтобы корректно отображаться на разных экранах.
  */
 @Composable
 fun rememberAnimatedBrush(): Brush {
     val density = LocalDensity.current
 
-    // Вычисляем размеры в пикселях на основе DP
-    // distancePx - насколько далеко уходит градиент (длина цикла)
-    // gradientWidthPx - физическая ширина самой цветовой полосы
     val (distancePx, gradientWidthPx) = with(density) {
         Pair(3000.dp.toPx(), 500.dp.toPx())
     }
 
-    // 1. Определяем цвета для перелива.
     val shimmerColors = listOf(
-        CyberCyan,          // Начало
-        DeepViolet,         // Глубина
-        Color(0xFFBC13FE),  // Яркая вспышка (Magenta)
-        CyberCyan           // Конец (замыкаем круг)
+        CyberCyan,
+        DeepViolet,
+        Color(0xFFBC13FE),
+        CyberCyan
     )
 
-    // 2. Настраиваем бесконечную анимацию
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
 
-    // Анимируем значение смещения (offset)
     val translateAnimation by transition.animateFloat(
         initialValue = 0f,
-        targetValue = distancePx, // Используем вычисленное значение (зависит от DPI)
+        targetValue = distancePx,
         animationSpec = infiniteRepeatable(
             animation = tween(
                 durationMillis = 12000,
@@ -63,11 +56,9 @@ fun rememberAnimatedBrush(): Brush {
         label = "shimmer_offset"
     )
 
-    // 3. Создаем градиент, который сдвигается по диагонали
     return Brush.linearGradient(
         colors = shimmerColors,
         start = Offset(translateAnimation, translateAnimation),
-        // Ширина градиента теперь тоже зависит от DPI, сохраняя пропорции
         end = Offset(translateAnimation + gradientWidthPx, translateAnimation + gradientWidthPx),
         tileMode = TileMode.Mirror
     )
@@ -79,7 +70,7 @@ fun WelcomeScreen(
     onLoginSignUpClick: () -> Unit = {},
     onSignInClick: () -> Unit = {}
 ) {
-    // Scaffold или Surface обеспечивает правильный фон и цвет контента
+    // Surface обеспечивает правильный фон на весь экран (включая области под системными барами)
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -87,8 +78,10 @@ fun WelcomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // УДАЛИТЕ ИЛИ ЗАКОММЕНТИРУЙТЕ ЭТУ СТРОКУ:
-                // .systemBarsPadding()
+                // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                // systemBarsPadding() добавляет отступы, равные высоте статус-бара и нав-бара.
+                // Это гарантирует, что контент внутри Column не будет перекрыт системным интерфейсом.
+                .systemBarsPadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -99,14 +92,12 @@ fun WelcomeScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Получаем нашу анимированную кисть
                 val animatedBrush = rememberAnimatedBrush()
 
                 Text(
                     text = "SHESH",
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontWeight = FontWeight.Black,
-                        // Применяем "жидкий неон" вместо статического цвета
                         brush = animatedBrush
                     )
                 )
@@ -135,17 +126,15 @@ fun WelcomeScreen(
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Icon(
-                        // Ссылаемся на созданный файл
                         painter = painterResource(id = R.drawable.ic_google_logo),
                         contentDescription = "Google Logo",
-                        // Размер чуть больше, чем у стандартных иконок, для логотипов это нормально
                         modifier = Modifier.size(24.dp),
-                        // ВАЖНО: Unspecified, чтобы Compose не перекрашивал иконку в цвет текста
                         tint = Color.Unspecified
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Продолжить через Google")
                 }
+
                 // SECONDARY ACTION: Email
                 OutlinedButton(
                     onClick = onLoginSignUpClick,
@@ -155,19 +144,15 @@ fun WelcomeScreen(
                     shape = MaterialTheme.shapes.medium,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
-                    // Добавляем иконку
                     Icon(
-                        imageVector = Icons.Default.Email, // Или Icons.Outlined.Email
+                        imageVector = Icons.Default.Email,
                         contentDescription = "Email Icon",
-                        modifier = Modifier.size(24.dp),
-                        // Цвет иконки подтянется автоматически (обычно Primary или цвет текста)
-                        // Но можно задать явно, например: tint = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(24.dp)
                     )
-
-                    Spacer(modifier = Modifier.width(8.dp)) // Отступ между иконкой и текстом
-
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Регистрация по email")
                 }
+
                 // TERTIARY ACTION: Вход
                 TextButton(
                     onClick = onSignInClick,
