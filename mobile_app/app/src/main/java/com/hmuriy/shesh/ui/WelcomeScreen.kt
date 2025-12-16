@@ -39,7 +39,7 @@ fun WelcomeScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "ЧИСТЫЙ СКИЛЛ :: ДРАЙВ",
+                text = "ЧИСТЫЙ СКИЛЛ И ДРАЙВ",
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = TerminalGreen,
                     letterSpacing = 2.sp,

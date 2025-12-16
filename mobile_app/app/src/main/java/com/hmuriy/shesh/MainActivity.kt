@@ -11,10 +11,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
 
+        var isReady = false
+        splashScreen.setKeepOnScreenCondition {
+            !isReady
+        }
         super.onCreate(savedInstanceState)
 
         setContent {
             SheshTheme {
+                isReady = true
                 WelcomeScreen()
             }
         }
