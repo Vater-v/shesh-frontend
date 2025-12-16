@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -58,4 +59,6 @@ dependencies {
     implementation(libs.androidx.material3)
 
     debugImplementation(libs.androidx.ui.tooling)
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
