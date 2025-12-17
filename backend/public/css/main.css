@@ -90,6 +90,8 @@ ul {
 .header__logo {
   display: flex;
   align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 .logo__text {
@@ -98,20 +100,15 @@ ul {
   letter-spacing: 0.1em; /* Wide tracking for technical look */
   color: var(--color-text-primary);
   text-transform: uppercase;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
-.logo__text::after {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background-color: var(--color-primary);
-  margin-left: 4px;
-  border-radius: 50%;
-  vertical-align: middle;
-  box-shadow: 0 0 8px var(--color-primary);
+.header__logo:hover .logo__text {
+  text-shadow: 0 0 5px var(--color-text-primary),
+    0 0 20px var(--color-text-primary);
+  /* Опционально: легкое изменение цвета, если есть акцентный цвет */
+  /* color: var(--color-accent); */
 }
-
 /* --- Navigation --- */
 .header__nav {
   display: flex;
@@ -625,5 +622,174 @@ ul {
   .showcase__text {
     margin-left: auto;
     margin-right: auto;
+  }
+}
+/* --- Footer & Waitlist Section --- */
+.footer {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: 80px 0 40px;
+  margin-top: 60px;
+}
+
+.footer__container {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+/* CTA Box (The "Join" area) */
+.footer__cta-box {
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    rgba(18, 18, 18, 0) 100%
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 64px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle cyber-glow at top of card */
+.footer__cta-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
+  opacity: 0.5;
+  box-shadow: 0 0 15px var(--color-primary);
+}
+
+.footer__title {
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: var(--fw-bold);
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.footer__subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 40px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Subscribe Form */
+.subscribe-form {
+  display: flex;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.subscribe-form__input {
+  flex: 1;
+  background-color: rgba(5, 5, 5, 0.5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 20px;
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  transition: var(--transition);
+  outline: none;
+}
+
+.subscribe-form__input::placeholder {
+  color: #4a4a4a;
+}
+
+.subscribe-form__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+  background-color: var(--color-bg);
+}
+
+.subscribe-form__btn {
+  /* Inherits .btn--primary properties, adding specific spacing if needed */
+  flex-shrink: 0;
+}
+
+/* Visually Hidden Label (Accessibilty) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Footer Bottom (Links & Copy) --- */
+.footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid rgba(51, 51, 51, 0.5);
+  font-size: 0.875rem;
+}
+
+.copyright {
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-medium);
+}
+
+.footer__links-list {
+  display: flex;
+  gap: 32px;
+}
+
+.footer__link {
+  color: var(--color-text-secondary);
+  transition: var(--transition);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  font-weight: var(--fw-bold);
+}
+
+.footer__link:hover {
+  color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .subscribe-form {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .subscribe-form__btn {
+    width: 100%;
+  }
+
+  .footer__bottom {
+    flex-direction: column-reverse;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .footer__cta-box {
+    padding: 48px 20px;
   }
 }
