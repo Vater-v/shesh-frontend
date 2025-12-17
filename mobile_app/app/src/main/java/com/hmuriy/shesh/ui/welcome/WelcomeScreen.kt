@@ -86,7 +86,7 @@ fun WelcomeScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Твое уютное пространство\nдля общения и идей.",
+                text = "Эйфория тотального\nконтроля.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

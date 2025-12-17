@@ -48,9 +48,9 @@ fun SheshTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Прозрачный статус бар для edge-to-edge
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
+            // Эти две строки можно удалить, так как enableEdgeToEdge() в MainActivity делает это за вас
+            // window.statusBarColor = Color.Transparent.toArgb()
+            // window.navigationBarColor = Color.Transparent.toArgb()
 
             val insetsController = WindowCompat.getInsetsController(window, view)
             insetsController.isAppearanceLightStatusBars = !darkTheme

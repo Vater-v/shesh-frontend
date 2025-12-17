@@ -26,10 +26,10 @@ class MainActivity : ComponentActivity() {
             // 1. Observe Theme State (persisted in DataStore)
             val isDarkTheme by mainViewModel.isDarkTheme.collectAsState()
 
-            // 2. Apply Theme Wrapper
+// 2. Apply Theme Wrapper
             SheshTheme(
-                darkTheme = isDarkTheme,
-                dynamicColor = false // Disable Material You to enforce Brand Colors
+                darkTheme = isDarkTheme
+                // Строку dynamicColor = false удаляем
             ) {
                 // 3. Pass toggle function and state to Navigation
                 SheshNavGraph(
