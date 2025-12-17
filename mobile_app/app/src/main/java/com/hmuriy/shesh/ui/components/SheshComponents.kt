@@ -1,7 +1,7 @@
+//./ui/components/SheshComponents.kt
 package com.hmuriy.shesh.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -45,15 +45,6 @@ fun SheshTextField(
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Animate border color based on state
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isError -> MaterialTheme.colorScheme.error
-            isSuccess -> SuccessGreen
-            else -> MaterialTheme.colorScheme.outline
-        }, label = "BorderColor"
-    )
-
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = value,
@@ -70,22 +61,33 @@ fun SheshTextField(
             } else null,
             trailingIcon = {
                 if (isPassword) {
+                    // UX Fix: Swapped icons to match standard Material patterns.
+                    // If text is visible (True) -> Show "Hide" icon (Eye Slash).
+                    // If text is hidden (False) -> Show "Show" icon (Eye).
+                    val image = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility
+                    val description = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
+
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            imageVector = if (passwordVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                            contentDescription = "Toggle Password"
+                            imageVector = image,
+                            contentDescription = description
                         )
                     }
                 } else if (isSuccess) {
-                    Icon(Icons.Rounded.CheckCircle, contentDescription = "Valid", tint = SuccessGreen)
+                    Icon(
+                        Icons.Rounded.CheckCircle,
+                        contentDescription = "Корректно", // Localized "Valid"
+                        tint = SuccessGreen
+                    )
                 }
             },
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = if(isSuccess) SuccessGreen else MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                focusedBorderColor = if (isSuccess) SuccessGreen else MaterialTheme.colorScheme.primary,
+                // UI Enhancement: Maintain green border (dimmed) if valid even when unfocused
+                unfocusedBorderColor = if (isSuccess) SuccessGreen.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                 errorBorderColor = MaterialTheme.colorScheme.error,
-                focusedLabelColor = if(isSuccess) SuccessGreen else MaterialTheme.colorScheme.primary,
+                focusedLabelColor = if (isSuccess) SuccessGreen else MaterialTheme.colorScheme.primary,
                 focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
             )
