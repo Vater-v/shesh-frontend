@@ -14,17 +14,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val themeStore = ThemeStore(application)
 
-    // StateFlow для UI. initialValue = false (Светлая при старте)
+    // Default to Dark Theme (Cyberpunk) if not set
     val isDarkTheme: StateFlow<Boolean> = themeStore.isDarkTheme
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
+            initialValue = true
         )
 
     fun toggleTheme() {
         viewModelScope.launch {
-            // Инвертируем текущее значение
             themeStore.saveTheme(!isDarkTheme.value)
         }
     }

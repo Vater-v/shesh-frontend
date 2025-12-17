@@ -16,32 +16,26 @@ class LoginViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // Единое поле ввода идентификатора
     var identityInput by mutableStateOf("")
         private set
 
-    // Пароль
     var password by mutableStateOf("")
         private set
 
-    // Состояние "Подтвержден ли Identity"
     var isIdentitySubmitted by mutableStateOf(false)
         private set
 
-    // Вычисляемое свойство для UI: Email или Username?
     val isEmailDetected: Boolean
         get() = identityInput.contains("@")
 
     fun updateIdentity(input: String) {
         identityInput = input
-        // Если пользователь стер поле, скрываем пароль обратно
         if (input.isEmpty()) {
             isIdentitySubmitted = false
             password = ""
         }
     }
 
-    // Вызывается по нажатию Next/Enter
     fun submitIdentity() {
         if (identityInput.isNotBlank()) {
             isIdentitySubmitted = true
@@ -54,19 +48,18 @@ class LoginViewModel : ViewModel() {
 
     fun login() {
         if (identityInput.isBlank() || password.isBlank()) {
-            _uiState.value = LoginUiState.Error("IDENTITY_VERIFICATION_FAILED")
+            _uiState.value = LoginUiState.Error("ОШИБКА: ПУСТЫЕ ДАННЫЕ")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
-            delay(1500) // Имитация проверки
+            delay(1500)
 
-            // Заглушка
             if (password.length >= 6) {
                 _uiState.value = LoginUiState.Success
             } else {
-                _uiState.value = LoginUiState.Error("ACCESS DENIED: INVALID KEY")
+                _uiState.value = LoginUiState.Error("ОТКАЗ В ДОСТУПЕ: НЕВЕРНЫЙ КЛЮЧ")
             }
         }
     }

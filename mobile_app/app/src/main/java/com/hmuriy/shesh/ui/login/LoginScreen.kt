@@ -41,7 +41,6 @@ fun LoginScreen(
         }
     }
 
-    // Auto-focus: как только поле пароля становится видимым, запрашиваем фокус
     LaunchedEffect(viewModel.isIdentitySubmitted) {
         if (viewModel.isIdentitySubmitted) {
             passwordFocusRequester.requestFocus()
@@ -49,7 +48,7 @@ fun LoginScreen(
     }
 
     Scaffold(
-        containerColor = VoidDark,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Box(
                 modifier = Modifier
@@ -58,7 +57,11 @@ fun LoginScreen(
                     .padding(16.dp)
             ) {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Abort", tint = TextGray)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Отмена",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
@@ -73,15 +76,15 @@ fun LoginScreen(
         ) {
             // --- HEADER ---
             Text(
-                text = "GATEWAY_AUTH //",
-                color = CyberCyan,
+                text = "АВТОРИЗАЦИЯ_ШЛЮЗА //",
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelSmall,
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Identity",
-                color = TextWhite,
+                text = "Идентификация",
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -89,9 +92,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             // --- SMART IDENTITY INPUT ---
-            val labelText = if (viewModel.identityInput.isEmpty()) "USERNAME / EMAIL"
-            else if (viewModel.isEmailDetected) "IDENTITY :: EMAIL"
-            else "IDENTITY :: USERNAME"
+            val labelText = if (viewModel.identityInput.isEmpty()) "ИМЯ / EMAIL"
+            else if (viewModel.isEmailDetected) "ПРОТОКОЛ :: EMAIL"
+            else "ПРОТОКОЛ :: ИМЯ"
 
             OutlinedTextField(
                 value = viewModel.identityInput,
@@ -99,12 +102,16 @@ fun LoginScreen(
                 label = { Text(labelText) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = CyberCyan),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { viewModel.submitIdentity() }),
                 trailingIcon = {
                     val icon = if (viewModel.isEmailDetected) Icons.Default.AlternateEmail else Icons.Default.Fingerprint
-                    Icon(icon, contentDescription = null, tint = if(viewModel.identityInput.isNotEmpty()) CyberCyan else TextGray)
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = if(viewModel.identityInput.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 },
                 colors = terminalInputColors(),
                 shape = CutCornerShape(topStart = 0.dp, bottomEnd = 16.dp)
@@ -121,7 +128,7 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = viewModel.password,
                         onValueChange = { viewModel.updatePassword(it) },
-                        label = { Text("PASSPHRASE") },
+                        label = { Text("ПАРОЛЬ ДОСТУПА") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(passwordFocusRequester),
@@ -130,7 +137,7 @@ fun LoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { viewModel.login() }),
                         trailingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = TextGray)
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         },
                         colors = terminalInputColors(),
                         shape = CutCornerShape(bottomEnd = 16.dp)
@@ -143,8 +150,8 @@ fun LoginScreen(
             Box(modifier = Modifier.height(24.dp)) {
                 if (uiState is LoginUiState.Error) {
                     Text(
-                        text = ">> ERR: ${(uiState as LoginUiState.Error).message}",
-                        color = CriticalRed,
+                        text = ">> ОШИБКА: ${(uiState as LoginUiState.Error).message}",
+                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
@@ -158,16 +165,15 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = CutCornerShape(bottomEnd = 16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CyberCyan,
-                        contentColor = VoidDark,
-                        disabledContainerColor = SurfaceLighter
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     enabled = uiState !is LoginUiState.Loading
                 ) {
                     if (uiState is LoginUiState.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = VoidDark)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                     } else {
-                        Text("ESTABLISH CONNECTION", fontWeight = FontWeight.Bold)
+                        Text("УСТАНОВИТЬ СОЕДИНЕНИЕ", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -175,15 +181,16 @@ fun LoginScreen(
     }
 }
 
+// Dynamic input colors reflecting current theme
 @Composable
 fun terminalInputColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = CyberCyan,
-    unfocusedBorderColor = TextGray.copy(alpha = 0.5f),
-    cursorColor = CyberCyan,
-    focusedLabelColor = CyberCyan,
-    unfocusedLabelColor = TextGray,
-    focusedTextColor = CyberCyan,
-    unfocusedTextColor = TextWhite,
+    focusedBorderColor = MaterialTheme.colorScheme.primary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+    cursorColor = MaterialTheme.colorScheme.primary,
+    focusedLabelColor = MaterialTheme.colorScheme.primary,
+    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    focusedTextColor = MaterialTheme.colorScheme.primary,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
     focusedContainerColor = Color.Transparent,
     unfocusedContainerColor = Color.Transparent
 )

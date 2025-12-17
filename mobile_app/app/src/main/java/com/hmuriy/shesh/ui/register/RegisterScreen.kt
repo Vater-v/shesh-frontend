@@ -32,9 +32,12 @@ fun RegisterScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Анимация цвета: CyberCyan для Secure, SoftViolet для Stealth
+    // Dynamic accent selection
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
     val accentColor by animateColorAsState(
-        targetValue = if (viewModel.selectedTabIndex == 0) CyberCyan else SoftViolet,
+        targetValue = if (viewModel.selectedTabIndex == 0) primaryColor else secondaryColor,
         animationSpec = tween(500), label = "Accent"
     )
 
@@ -45,11 +48,15 @@ fun RegisterScreen(
     }
 
     Scaffold(
-        containerColor = VoidDark,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Box(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp)) {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextGray)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Назад",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
@@ -61,8 +68,8 @@ fun RegisterScreen(
         ) {
             // Header
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                Text("UPLINK_PROTOCOL //", color = TextGray, style = MaterialTheme.typography.labelSmall)
-                Text("New Identity", color = TextWhite, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+                Text("ПРОТОКОЛ_СВЯЗИ //", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                Text("Новая Личность", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -79,21 +86,21 @@ fun RegisterScreen(
                         height = 2.dp
                     )
                 },
-                divider = { HorizontalDivider(color = SurfaceLighter) }
+                divider = { HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant) }
             ) {
                 Tab(
                     selected = viewModel.selectedTabIndex == 0,
                     onClick = { viewModel.switchTab(0) },
-                    text = { Text("SECURE", fontWeight = FontWeight.Bold) },
-                    selectedContentColor = CyberCyan,
-                    unselectedContentColor = TextGray
+                    text = { Text("СТАНДАРТ", fontWeight = FontWeight.Bold) },
+                    selectedContentColor = primaryColor,
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Tab(
                     selected = viewModel.selectedTabIndex == 1,
                     onClick = { viewModel.switchTab(1) },
-                    text = { Text("STEALTH", fontWeight = FontWeight.Bold) },
-                    selectedContentColor = SoftViolet,
-                    unselectedContentColor = TextGray
+                    text = { Text("СТЕЛС", fontWeight = FontWeight.Bold) },
+                    selectedContentColor = secondaryColor,
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -106,12 +113,12 @@ fun RegisterScreen(
                     .padding(horizontal = 24.dp)
                     .weight(1f)
             ) {
-                // Email (Secure Only)
+                // Email (Only for Standard Mode)
                 if (viewModel.selectedTabIndex == 0) {
                     OutlinedTextField(
                         value = viewModel.email,
                         onValueChange = { viewModel.email = it },
-                        label = { Text("EMAIL_RELAY") },
+                        label = { Text("EMAIL ШЛЮЗ") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -125,7 +132,7 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = viewModel.username,
                     onValueChange = { viewModel.username = it },
-                    label = { Text("CODENAME / ALIAS") },
+                    label = { Text("ПСЕВДОНИМ") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -139,7 +146,7 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = viewModel.password,
                     onValueChange = { viewModel.password = it },
-                    label = { Text("SECRET_KEY") },
+                    label = { Text("СЕКРЕТНЫЙ КЛЮЧ") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
@@ -155,7 +162,7 @@ fun RegisterScreen(
                         Icon(Icons.Default.Warning, null, tint = WarningAmber, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Внимание: Без привязки Email восстановление доступа невозможно. Не забудьте пароль.",
+                            text = "ВНИМАНИЕ: Без Email восстановление доступа невозможно. Не потеряйте ключ.",
                             color = WarningAmber,
                             style = MaterialTheme.typography.bodySmall,
                             lineHeight = 14.sp
@@ -163,18 +170,18 @@ fun RegisterScreen(
                     }
                 }
 
-                // Error
+                // Error Display
                 if (uiState is RegisterUiState.Error) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = ">> ERROR: ${(uiState as RegisterUiState.Error).message}",
-                        color = CriticalRed,
+                        text = ">> ОШИБКА: ${(uiState as RegisterUiState.Error).message}",
+                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
 
-            // Button
+            // Register Button
             Button(
                 onClick = { viewModel.register() },
                 modifier = Modifier
@@ -184,13 +191,13 @@ fun RegisterScreen(
                 shape = CutCornerShape(bottomEnd = 16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accentColor,
-                    contentColor = if (viewModel.selectedTabIndex == 0) Color.Black else TextWhite
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 if (uiState is RegisterUiState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Text(if (viewModel.selectedTabIndex == 0) "INITIALIZE LINK" else "GHOST MODE ACTIVATE")
+                    Text(if (viewModel.selectedTabIndex == 0) "ИНИЦИАЛИЗАЦИЯ" else "АКТИВИРОВАТЬ ФАНТОМ")
                 }
             }
         }
@@ -200,11 +207,11 @@ fun RegisterScreen(
 @Composable
 fun registerInputColors(accent: Color) = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = accent,
-    unfocusedBorderColor = SurfaceLighter,
+    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
     cursorColor = accent,
     focusedLabelColor = accent,
-    unfocusedLabelColor = TextGray,
-    focusedTextColor = TextWhite,
+    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    focusedTextColor = MaterialTheme.colorScheme.onBackground,
     focusedContainerColor = Color.Transparent,
     unfocusedContainerColor = Color.Transparent
 )
