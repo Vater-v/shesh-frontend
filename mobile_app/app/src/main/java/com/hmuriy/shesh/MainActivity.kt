@@ -18,18 +18,21 @@ class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        // Initialize the splash screen before setting content
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Enable edge-to-edge for a modern, immersive experience (Cyberpunk aesthetic)
         enableEdgeToEdge()
 
         setContent {
             // 1. Observe Theme State (persisted in DataStore)
             val isDarkTheme by mainViewModel.isDarkTheme.collectAsState()
 
-// 2. Apply Theme Wrapper
+            // 2. Apply Theme Wrapper
+            // Note: dynamicColor is intentionally omitted to enforce the custom design system
             SheshTheme(
                 darkTheme = isDarkTheme
-                // Строку dynamicColor = false удаляем
             ) {
                 // 3. Pass toggle function and state to Navigation
                 SheshNavGraph(
