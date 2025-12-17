@@ -1,12 +1,13 @@
+//./ui/register/RegisterScreen.kt
 package com.hmuriy.shesh.ui.register
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -42,8 +43,9 @@ fun RegisterScreen(
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(uiState) {
-        if (uiState is RegisterUiState.Success) onRegisterSuccess()
+    // FIX 1: Check property isSuccess instead of type checking (RegisterUiState is a data class)
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) onRegisterSuccess()
     }
 
     Scaffold(
@@ -129,22 +131,24 @@ fun RegisterScreen(
                     if (targetIndex == 0) {
                         SheshTextField(
                             value = viewModel.email,
-                            onValueChange = { viewModel.email = it },
+                            // FIX 2: Use updateEmail() because setter is private
+                            onValueChange = { viewModel.updateEmail(it) },
                             label = "Email Address",
                             icon = Icons.Rounded.AlternateEmail,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
                             ),
-                            // Simple derived state for visualization (assuming basic validation logic exists)
-                            isError = uiState is RegisterUiState.Error && (uiState as RegisterUiState.Error).message.contains("Email", true)
+                            // FIX 3: Check uiState.error property
+                            isError = uiState.error?.contains("Email", true) == true
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
                     SheshTextField(
                         value = viewModel.username,
-                        onValueChange = { viewModel.username = it },
+                        // FIX 2: Use updateUsername()
+                        onValueChange = { viewModel.updateUsername(it) },
                         label = if (targetIndex == 0) "Username" else "Alias",
                         icon = if (targetIndex == 0) Icons.Rounded.Person else Icons.Rounded.Shield,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -154,7 +158,8 @@ fun RegisterScreen(
 
                     SheshTextField(
                         value = viewModel.password,
-                        onValueChange = { viewModel.password = it },
+                        // FIX 2: Use updatePassword()
+                        onValueChange = { viewModel.updatePassword(it) },
                         label = "Password",
                         icon = Icons.Rounded.VpnKey,
                         isPassword = true,
@@ -200,10 +205,11 @@ fun RegisterScreen(
             }
 
             // General Error Message
-            if (uiState is RegisterUiState.Error) {
+            // FIX 4: Check if error is not null
+            if (uiState.error != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = (uiState as RegisterUiState.Error).message,
+                    text = uiState.error!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -217,7 +223,8 @@ fun RegisterScreen(
                     focusManager.clearFocus()
                     viewModel.register()
                 },
-                isLoading = uiState is RegisterUiState.Loading,
+                // FIX 5: Check isLoading boolean property
+                isLoading = uiState.isLoading,
                 containerColor = if(viewModel.selectedTabIndex == 1) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
             )
 
