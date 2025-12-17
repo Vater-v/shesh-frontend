@@ -1,19 +1,20 @@
 //./ui/welcome/WelcomeScreen.kt
 package com.hmuriy.shesh.ui.welcome
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode // Импорт для иконки Луны
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LightMode // Импорт для иконки Солнца
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -92,7 +93,7 @@ fun WelcomeScreen(
     // Инициализация Credential Manager
     val credentialManager = remember { CredentialManager.create(context) }
 
-    // Получаем Web Client ID из ресурсов
+    // Получаем Web Client ID из ресурсов (значение: 325529913880-g4dqacc0iv8k6i9jn9u9l9284gudotsr.apps.googleusercontent.com)
     val webClientId = stringResource(id = R.string.web_client_id)
 
     Surface(
@@ -162,39 +163,12 @@ fun WelcomeScreen(
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                try {
-                                    // 1. Настройка опции входа через Google
-                                    val googleIdOption = GetGoogleIdOption.Builder()
-                                        .setFilterByAuthorizedAccounts(false) // Показываем все аккаунты
-                                        .setServerClientId(webClientId) // ВАЖНО: Web Client ID
-                                        .setAutoSelectEnabled(true) // Авто-выбор, если возможен
-                                        .build()
-
-                                    // 2. Создание запроса
-                                    val request = GetCredentialRequest.Builder()
-                                        .addCredentialOption(googleIdOption)
-                                        .build()
-
-                                    // 3. Запуск системного диалога
-                                    val result = credentialManager.getCredential(
-                                        request = request,
-                                        context = context
-                                    )
-
-                                    // 4. Обработка результата
-                                    val credential = result.credential
-                                    if (credential is GoogleIdTokenCredential) {
-                                        // Успех! Передаем токен во ViewModel (через навигацию)
-                                        onGoogleSignInSuccess(credential.idToken)
-                                    } else {
-                                        Log.e("WelcomeScreen", "Unexpected credential type")
-                                    }
-                                } catch (e: GetCredentialException) {
-                                    // Пользователь отменил вход или произошла ошибка
-                                    Log.e("WelcomeScreen", "Google Sign-In failed", e)
-                                } catch (e: Exception) {
-                                    Log.e("WelcomeScreen", "Error", e)
-                                }
+                                signInWithGoogle(
+                                    context = context,
+                                    credentialManager = credentialManager,
+                                    webClientId = webClientId,
+                                    onSuccess = onGoogleSignInSuccess
+                                )
                             }
                         },
                         modifier = Modifier
@@ -248,6 +222,58 @@ fun WelcomeScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Логика входа через Google с использованием Credential Manager.
+ */
+private suspend fun signInWithGoogle(
+    context: Context,
+    credentialManager: CredentialManager,
+    webClientId: String,
+    onSuccess: (String) -> Unit
+) {
+    try {
+        // 1. Формируем опцию для Google ID
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false) // false = показывать все доступные аккаунты
+            .setServerClientId(webClientId)       // ID клиента из Google Cloud Console (Firebase)
+            .setAutoSelectEnabled(true)           // Авто-выбор, если доступен один аккаунт
+            .build()
+
+        // 2. Создаем запрос
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        // 3. Показываем системное окно выбора аккаунта
+        val result = credentialManager.getCredential(
+            request = request,
+            context = context
+        )
+
+        // 4. Обрабатываем результат
+        val credential = result.credential
+
+        // Проверяем тип креда (библиотека googleid предоставляет класс-обертку)
+        if (credential is GoogleIdTokenCredential) {
+            // Успех!
+            val googleIdToken = credential.idToken
+            onSuccess(googleIdToken)
+        } else if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            // Альтернативная проверка (на случай изменения версий библиотек)
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            onSuccess(googleIdTokenCredential.idToken)
+        } else {
+            Log.e("WelcomeScreen", "Unexpected credential type: ${credential.type}")
+        }
+
+    } catch (e: GetCredentialException) {
+        // Пользователь отменил вход или произошла ошибка
+        Log.e("WelcomeScreen", "Google Sign-In failed or cancelled: ${e.message}")
+    } catch (e: Exception) {
+        Log.e("WelcomeScreen", "Unexpected error during Sign-In", e)
     }
 }
 

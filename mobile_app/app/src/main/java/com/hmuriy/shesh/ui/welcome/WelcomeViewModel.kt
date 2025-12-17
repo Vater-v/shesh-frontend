@@ -32,38 +32,35 @@ class WelcomeViewModel : ViewModel() {
      */
     fun handleGoogleSignIn(googleIdToken: String) {
         viewModelScope.launch {
-            // 1. Показываем загрузку
             _uiState.value = WelcomeUiState.Loading
 
             try {
-                // --- ШАГ 1: Вход в Firebase ---
+                // --- ШАГ 1: Логинимся в Firebase с помощью Google токена (на клиенте) ---
                 val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
                 val auth = FirebaseAuth.getInstance()
 
-                // Используем await() чтобы дождаться результата в корутине (вместо callback-ов)
+                // Используем await() чтобы дождаться результата в корутине
                 val authResult = auth.signInWithCredential(credential).await()
-                val firebaseUser = authResult.user
+                val firebaseUser = authResult.user ?: throw Exception("User is null")
 
-                if (firebaseUser == null) {
-                    throw Exception("Не удалось получить пользователя Firebase")
-                }
+                // --- ШАГ 2: ПОЛУЧАЕМ ТОКЕН ДЛЯ БЭКЕНДА ---
+                // getIdToken(true) заставляет обновить токен и возвращает сырой JWT (Firebase ID Token).
+                // Это тот самый токен, который нужно слать на бэкенд для проверки через Admin SDK.
+                val tokenResult = firebaseUser.getIdToken(true).await()
+                val tokenForBackend = tokenResult.token
 
-                // --- ШАГ 2: Отправка данных на Ваш Бэкенд ---
-                // Здесь мы берем данные пользователя и токен, чтобы зарегистрировать
-                // или авторизовать его на вашем сервере.
+                if (tokenForBackend == null) throw Exception("Backend token is null")
 
-                // Примечание: Для валидации на бэкенде можно слать googleIdToken
-                // или получить свежий токен Firebase: firebaseUser.getIdToken(true).await()
-
+                // --- ШАГ 3: Отправляем на сервер именно tokenForBackend ---
                 val backendToken = loginToBackend(
-                    idToken = googleIdToken,
+                    idToken = tokenForBackend, // <--- Шлем этот токен (Firebase JWT)!
                     email = firebaseUser.email,
                     name = firebaseUser.displayName,
                     photoUrl = firebaseUser.photoUrl?.toString()
                 )
 
-                // --- ШАГ 3: Сохранение сессии ---
-                // TODO: Сохраните backendToken в DataStore или SharedPreferences
+                // --- ШАГ 4: Сохранение сессии ---
+                // TODO: Сохраните backendToken (сессионный токен вашего бэкенда) в DataStore или SharedPreferences
                 // sessionManager.saveAuthToken(backendToken)
                 Log.d("WelcomeViewModel", "Backend token received: $backendToken")
 
@@ -98,6 +95,7 @@ class WelcomeViewModel : ViewModel() {
         // return response.token
 
         // Пока возвращаем фейковый токен
+        Log.d("WelcomeViewModel", "Logging in to backend with token: ${idToken.take(10)}...")
         return "mock_backend_jwt_token_example_12345"
     }
 
