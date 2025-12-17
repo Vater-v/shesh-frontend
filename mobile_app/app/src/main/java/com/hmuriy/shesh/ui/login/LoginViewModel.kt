@@ -22,44 +22,32 @@ class LoginViewModel : ViewModel() {
     var password by mutableStateOf("")
         private set
 
-    var isIdentitySubmitted by mutableStateOf(false)
-        private set
-
-    val isEmailDetected: Boolean
-        get() = identityInput.contains("@")
+    // Вспомогательное свойство для смены иконки (Email или Person)
+    val isEmailDetected: Boolean get() = identityInput.contains("@")
 
     fun updateIdentity(input: String) {
         identityInput = input
-        if (input.isEmpty()) {
-            isIdentitySubmitted = false
-            password = ""
-        }
-    }
-
-    fun submitIdentity() {
-        if (identityInput.isNotBlank()) {
-            isIdentitySubmitted = true
-        }
+        if (_uiState.value is LoginUiState.Error) _uiState.value = LoginUiState.Idle
     }
 
     fun updatePassword(input: String) {
         password = input
+        if (_uiState.value is LoginUiState.Error) _uiState.value = LoginUiState.Idle
     }
 
     fun login() {
         if (identityInput.isBlank() || password.isBlank()) {
-            _uiState.value = LoginUiState.Error("ОШИБКА: ПУСТЫЕ ДАННЫЕ")
+            _uiState.value = LoginUiState.Error("Пожалуйста, заполните все поля")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             delay(1500)
-
             if (password.length >= 6) {
                 _uiState.value = LoginUiState.Success
             } else {
-                _uiState.value = LoginUiState.Error("ОТКАЗ В ДОСТУПЕ: НЕВЕРНЫЙ КЛЮЧ")
+                _uiState.value = LoginUiState.Error("Неверный логин или пароль")
             }
         }
     }
@@ -68,7 +56,6 @@ class LoginViewModel : ViewModel() {
         _uiState.value = LoginUiState.Idle
         identityInput = ""
         password = ""
-        isIdentitySubmitted = false
     }
 }
 

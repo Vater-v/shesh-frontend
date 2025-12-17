@@ -1,30 +1,30 @@
 //./ui/login/LoginScreen.kt
 package com.hmuriy.shesh.ui.login
 
-import androidx.compose.animation.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AlternateEmail
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hmuriy.shesh.ui.theme.*
+import com.hmuriy.shesh.ui.components.SheshButton
+import com.hmuriy.shesh.ui.components.SheshTextField
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onBackClick: () -> Unit,
@@ -32,7 +32,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val passwordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(uiState) {
         if (uiState is LoginUiState.Success) {
@@ -41,156 +41,91 @@ fun LoginScreen(
         }
     }
 
-    LaunchedEffect(viewModel.isIdentitySubmitted) {
-        if (viewModel.isIdentitySubmitted) {
-            passwordFocusRequester.requestFocus()
-        }
-    }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(16.dp)
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Отмена",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        // Используем AutoMirrored для правильного отображения стрелки в RTL/LTR
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+            )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(horizontal = 24.dp)
+                // Скрываем клавиатуру по тапу на фон
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { focusManager.clearFocus() },
             horizontalAlignment = Alignment.Start
         ) {
-            // --- HEADER ---
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "АВТОРИЗАЦИЯ_ШЛЮЗА //",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall,
-                letterSpacing = 2.sp
+                text = "С возвращением!",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Идентификация",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold
+                text = "Заполните данные для входа",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // --- SMART IDENTITY INPUT ---
-            val labelText = if (viewModel.identityInput.isEmpty()) "ИМЯ / EMAIL"
-            else if (viewModel.isEmailDetected) "ПРОТОКОЛ :: EMAIL"
-            else "ПРОТОКОЛ :: ИМЯ"
-
-            OutlinedTextField(
+            SheshTextField(
                 value = viewModel.identityInput,
                 onValueChange = { viewModel.updateIdentity(it) },
-                label = { Text(labelText) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { viewModel.submitIdentity() }),
-                trailingIcon = {
-                    val icon = if (viewModel.isEmailDetected) Icons.Default.AlternateEmail else Icons.Default.Fingerprint
-                    Icon(
-                        icon,
-                        contentDescription = null,
-                        tint = if(viewModel.identityInput.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = terminalInputColors(),
-                shape = CutCornerShape(topStart = 0.dp, bottomEnd = 16.dp)
+                label = "Email или Логин",
+                icon = if (viewModel.isEmailDetected) Icons.Rounded.AlternateEmail else Icons.Rounded.Person,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
-            // --- ANIMATED PASSWORD FIELD ---
-            AnimatedVisibility(
-                visible = viewModel.isIdentitySubmitted,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = viewModel.password,
-                        onValueChange = { viewModel.updatePassword(it) },
-                        label = { Text("ПАРОЛЬ ДОСТУПА") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(passwordFocusRequester),
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { viewModel.login() }),
-                        trailingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        },
-                        colors = terminalInputColors(),
-                        shape = CutCornerShape(bottomEnd = 16.dp)
-                    )
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SheshTextField(
+                value = viewModel.password,
+                onValueChange = { viewModel.updatePassword(it) },
+                label = "Пароль",
+                icon = Icons.Rounded.Lock,
+                isPassword = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = {
+                    focusManager.clearFocus()
+                    viewModel.login()
+                })
+            )
+
+            if (uiState is LoginUiState.Error) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = (uiState as LoginUiState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
-            // --- STATUS / ERROR ---
-            Spacer(modifier = Modifier.height(24.dp))
-            Box(modifier = Modifier.height(24.dp)) {
-                if (uiState is LoginUiState.Error) {
-                    Text(
-                        text = ">> ОШИБКА: ${(uiState as LoginUiState.Error).message}",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.weight(1f))
 
-            // --- ACTION BUTTON ---
+            SheshButton(
+                text = "Войти",
+                onClick = {
+                    focusManager.clearFocus()
+                    viewModel.login()
+                },
+                isLoading = uiState is LoginUiState.Loading
+            )
             Spacer(modifier = Modifier.height(24.dp))
-            AnimatedVisibility(visible = viewModel.isIdentitySubmitted) {
-                Button(
-                    onClick = { viewModel.login() },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = CutCornerShape(bottomEnd = 16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    enabled = uiState !is LoginUiState.Loading
-                ) {
-                    if (uiState is LoginUiState.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                    } else {
-                        Text("УСТАНОВИТЬ СОЕДИНЕНИЕ", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
         }
     }
 }
-
-// Dynamic input colors reflecting current theme
-@Composable
-fun terminalInputColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = MaterialTheme.colorScheme.primary,
-    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-    cursorColor = MaterialTheme.colorScheme.primary,
-    focusedLabelColor = MaterialTheme.colorScheme.primary,
-    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    focusedTextColor = MaterialTheme.colorScheme.primary,
-    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-    focusedContainerColor = Color.Transparent,
-    unfocusedContainerColor = Color.Transparent
-)

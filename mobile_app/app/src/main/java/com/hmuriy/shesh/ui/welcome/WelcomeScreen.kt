@@ -2,161 +2,110 @@
 package com.hmuriy.shesh.ui.welcome
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.hmuriy.shesh.ui.theme.*
-
-@Composable
-fun rememberAnimatedBrush(isDark: Boolean): Brush {
-    val density = LocalDensity.current
-    val (distancePx, gradientWidthPx) = with(density) {
-        Pair(3000.dp.toPx(), 500.dp.toPx())
-    }
-
-    // Adapt shimmer colors to theme to ensure visibility
-    val shimmerColors = if (isDark) {
-        listOf(CyberCyan, DeepViolet, Color(0xFFBC13FE), CyberCyan)
-    } else {
-        listOf(DeepViolet, CyberCyanDark, DeepViolet)
-    }
-
-    val transition = rememberInfiniteTransition(label = "shimmer_transition")
-    val translateAnimation by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = distancePx,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 12000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmer_offset"
-    )
-    return Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset(translateAnimation, translateAnimation),
-        end = Offset(translateAnimation + gradientWidthPx, translateAnimation + gradientWidthPx),
-        tileMode = TileMode.Mirror
-    )
-}
+import androidx.compose.ui.unit.sp
+import com.hmuriy.shesh.ui.components.SheshButton
 
 @Composable
 fun WelcomeScreen(
-    onLoginClick: () -> Unit = {},
-    onRegisterClick: () -> Unit = {},
-    onThemeToggle: () -> Unit = {},
-    isDarkTheme: Boolean = false
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onThemeToggle: () -> Unit,
+    isDarkTheme: Boolean
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        // Theme Toggle
+        // Декоративный "пузырь" на фоне
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .offset(x = (-50).dp, y = (-50).dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
         IconButton(
             onClick = onThemeToggle,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(16.dp)
+            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(16.dp)
         ) {
             Icon(
                 imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
-                contentDescription = "Переключить тему",
-                tint = MaterialTheme.colorScheme.onBackground
+                contentDescription = "Theme",
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
-                .padding(horizontal = 24.dp),
+            modifier = Modifier.fillMaxSize().systemBarsPadding().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Branding Section
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val animatedBrush = rememberAnimatedBrush(isDarkTheme)
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Плавающая иконка
+            val infiniteTransition = rememberInfiniteTransition(label = "float")
+            val dy by infiniteTransition.animateFloat(
+                initialValue = 0f, targetValue = -20f,
+                animationSpec = infiniteRepeatable(tween(2000, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+                label = "dy"
+            )
+            Icon(
+                imageVector = Icons.Rounded.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(80.dp).offset(y = dy.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Shesh",
+                style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Black, letterSpacing = (-1).sp),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Твое уютное пространство\nдля общения и идей.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            SheshButton(text = "Войти", onClick = onLoginClick)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = onRegisterClick) {
                 Text(
-                    text = "SHESH",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Black,
-                        brush = animatedBrush
-                    )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "ИДЕНТИФИКАЦИЯ :: УСПЕШНО",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold
+                    "Создать аккаунт",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
-
-            // Action Buttons
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 48.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // LOGIN Button
-                Button(
-                    onClick = onLoginClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Icon(Icons.Default.Login, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "ВХОД В СИСТЕМУ",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // REGISTER Button
-                OutlinedButton(
-                    onClick = onRegisterClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onBackground
-                    )
-                ) {
-                    Icon(Icons.Default.PersonAdd, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "НОВЫЙ ПРОТОКОЛ",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
