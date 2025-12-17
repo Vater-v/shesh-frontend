@@ -32,6 +32,7 @@ app.include_router(auth_router)
 
 # --- Монтирование статики ---
 app.mount("/css", StaticFiles(directory=PUBLIC_DIR / "css"), name="css")
+app.mount("/js", StaticFiles(directory=PUBLIC_DIR / "js"), name="js")
 
 # --- Главный роут ---
 @app.get("/")
