@@ -1,21 +1,28 @@
 //./ui/navigation/SheshNavGraph.kt
 package com.hmuriy.shesh.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hmuriy.shesh.ui.login.LoginScreen
+import com.hmuriy.shesh.ui.register.RegisterScreen
+import com.hmuriy.shesh.ui.theme.CyberCyan
+import com.hmuriy.shesh.ui.theme.VoidDark
 import com.hmuriy.shesh.ui.welcome.WelcomeScreen
 
 sealed class Screen(val route: String) {
     data object Welcome : Screen("welcome")
-    data object RegisterEmail : Screen("register_email")
+    data object Register : Screen("register")
     data object Login : Screen("login")
-    data object Home : Screen("home") // Заглушка главного экрана
+    data object Home : Screen("home")
 }
 
 @Composable
@@ -28,24 +35,23 @@ fun SheshNavGraph(
     NavHost(
         navController = navController,
         startDestination = Screen.Welcome.route,
-        modifier = modifier
+        modifier = modifier.background(VoidDark)
     ) {
-        // --- Лендинг ---
+        // --- Landing ---
         composable(Screen.Welcome.route) {
             WelcomeScreen(
                 onLoginClick = { navController.navigate(Screen.Login.route) },
-                onRegisterClick = { navController.navigate(Screen.RegisterEmail.route) },
+                onRegisterClick = { navController.navigate(Screen.Register.route) },
                 onThemeToggle = onThemeToggle,
                 isDarkTheme = isDarkTheme
             )
         }
 
-        // --- Вход ---
+        // --- The Gateway (Login) ---
         composable(Screen.Login.route) {
             LoginScreen(
                 onBackClick = { navController.popBackStack() },
                 onLoginSuccess = {
-                    // Переход на Home и удаление истории входа
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Welcome.route) { inclusive = true }
                     }
@@ -53,15 +59,26 @@ fun SheshNavGraph(
             )
         }
 
-        // --- Регистрация (Заглушка) ---
-        composable(Screen.RegisterEmail.route) {
-            // TODO: Создайте RegisterScreen по аналогии с LoginScreen
-            Text("Экран регистрации", color = androidx.compose.ui.graphics.Color.White)
+        // --- The Uplink (Registration) ---
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                onBackClick = { navController.popBackStack() },
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
-        // --- Главный экран (Заглушка) ---
+        // --- Home (Stub) ---
         composable(Screen.Home.route) {
-            Text("Добро пожаловать!", color = androidx.compose.ui.graphics.Color.White)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("SYSTEM ONLINE. ACCESS GRANTED.", color = CyberCyan)
+            }
         }
     }
 }

@@ -16,37 +16,66 @@ class LoginViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    var email by mutableStateOf("")
+    // Единое поле ввода идентификатора
+    var identityInput by mutableStateOf("")
         private set
+
+    // Пароль
     var password by mutableStateOf("")
         private set
 
-    fun updateEmail(input: String) { email = input }
-    fun updatePassword(input: String) { password = input }
+    // Состояние "Подтвержден ли Identity"
+    var isIdentitySubmitted by mutableStateOf(false)
+        private set
+
+    // Вычисляемое свойство для UI: Email или Username?
+    val isEmailDetected: Boolean
+        get() = identityInput.contains("@")
+
+    fun updateIdentity(input: String) {
+        identityInput = input
+        // Если пользователь стер поле, скрываем пароль обратно
+        if (input.isEmpty()) {
+            isIdentitySubmitted = false
+            password = ""
+        }
+    }
+
+    // Вызывается по нажатию Next/Enter
+    fun submitIdentity() {
+        if (identityInput.isNotBlank()) {
+            isIdentitySubmitted = true
+        }
+    }
+
+    fun updatePassword(input: String) {
+        password = input
+    }
 
     fun login() {
-        if (email.isBlank() || password.isBlank()) {
-            _uiState.value = LoginUiState.Error("Заполните все поля")
+        if (identityInput.isBlank() || password.isBlank()) {
+            _uiState.value = LoginUiState.Error("IDENTITY_VERIFICATION_FAILED")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
+            delay(1500) // Имитация проверки
 
-            // TODO: Замените на реальный API вызов
-            delay(1500) // Эмуляция сети
-
-            // Простая проверка (заглушка)
+            // Заглушка
             if (password.length >= 6) {
                 _uiState.value = LoginUiState.Success
             } else {
-                _uiState.value = LoginUiState.Error("Неверный логин или пароль")
+                _uiState.value = LoginUiState.Error("ACCESS DENIED: INVALID KEY")
             }
         }
     }
 
     fun resetState() {
         _uiState.value = LoginUiState.Idle
+        identityInput = ""
+        password = ""
+        isIdentitySubmitted = false
     }
 }
 
