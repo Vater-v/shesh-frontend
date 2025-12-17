@@ -8,3 +8,4 @@ aiosqlite
 pydantic-settings
 passlib[bcrypt]
 email-validator
+aiofiles
