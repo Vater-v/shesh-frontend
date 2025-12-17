@@ -239,7 +239,7 @@ private suspend fun signInWithGoogle(
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false) // false = показывать все доступные аккаунты
             .setServerClientId(webClientId)       // ID клиента из Google Cloud Console (Firebase)
-            .setAutoSelectEnabled(true)           // Авто-выбор, если доступен один аккаунт
+            .setAutoSelectEnabled(false)           // Авто-выбор, если доступен один аккаунт
             .build()
 
         // 2. Создаем запрос
