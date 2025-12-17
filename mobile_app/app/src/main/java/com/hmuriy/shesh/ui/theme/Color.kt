@@ -1,19 +1,26 @@
-//./ui/theme/Color.kt
 package com.hmuriy.shesh.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// --- Soft Lavender & Peach Palette ---
+// --- Technical Light Palette (Swiss Design) ---
+val TechBackground = Color(0xFFF8F9FA) // Cool Paper White
+val TechSurface = Color(0xFFFFFFFF)
+val TechPrimary = Color(0xFF2C3E50)    // Midnight Slate
+val TechSecondary = Color(0xFF2980B9)  // Electric Blue
+val TechAccent = Color(0xFFE74C3C)     // Alert/Action Red
+val TechTextPrimary = Color(0xFF1B1F23)
+val TechTextSecondary = Color(0xFF586069)
+val TechOutline = Color(0xFFD1D5DA)
 
-// Light Theme
-val LavenderPrimary = Color(0xFF6750A4)
-val LavenderContainer = Color(0xFFEADDFF)
-val PeachAccent = Color(0xFF9C4146) // Акцент и ошибки
-val NeutralSurface = Color(0xFFFFFBFE) // Теплый белый
-val NeutralText = Color(0xFF1C1B1F)
+// --- Deep Void Dark Palette (Cyberpunk) ---
+val VoidBackground = Color(0xFF050505) // True Abyss
+val VoidSurface = Color(0xFF121212)    // Deep Charcoal
+val VoidPrimary = Color(0xFF00E5FF)    // Cyber Cyan
+val VoidSecondary = Color(0xFFD500F9)  // Neon Violet
+val VoidError = Color(0xFFFF2A68)      // Neon Rose
+val VoidTextPrimary = Color(0xFFE0E0E0)
+val VoidTextSecondary = Color(0xFF858585)
+val VoidOutline = Color(0xFF333333)
 
-// Dark Theme (Deep Night)
-val DarkPrimary = Color(0xFFD0BCFF)
-val DarkBackground = Color(0xFF141218) // Глубокий темный, не чисто черный
-val DarkSurface = Color(0xFF2B2930)
-val DarkText = Color(0xFFE6E1E5)
+// Semantic Colors
+val SuccessGreen = Color(0xFF00C853)

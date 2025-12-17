@@ -1,4 +1,3 @@
-//./ui/theme/Theme.kt
 package com.hmuriy.shesh.ui.theme
 
 import android.app.Activity
@@ -8,33 +7,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = LavenderPrimary,
+    primary = TechPrimary,
     onPrimary = Color.White,
-    primaryContainer = LavenderContainer,
-    onPrimaryContainer = Color(0xFF21005D),
-    secondary = PeachAccent,
-    background = NeutralSurface,
-    surface = NeutralSurface,
-    onSurface = NeutralText,
-    error = PeachAccent
+    primaryContainer = Color(0xFFE3E5E8),
+    onPrimaryContainer = TechPrimary,
+    secondary = TechSecondary,
+    onSecondary = Color.White,
+    background = TechBackground,
+    surface = TechSurface,
+    onSurface = TechTextPrimary,
+    onSurfaceVariant = TechTextSecondary,
+    outline = TechOutline,
+    error = TechAccent
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimary,
-    onPrimary = Color(0xFF381E72),
-    primaryContainer = Color(0xFF4F378B),
-    onPrimaryContainer = LavenderContainer,
-    secondary = PeachAccent,
-    background = DarkBackground,
-    surface = DarkSurface,
-    onSurface = DarkText,
-    error = PeachAccent
+    primary = VoidPrimary,
+    onPrimary = Color.Black, // Black text on Cyan for max readability
+    primaryContainer = Color(0xFF003E45),
+    onPrimaryContainer = VoidPrimary,
+    secondary = VoidSecondary,
+    onSecondary = Color.White,
+    background = VoidBackground,
+    surface = VoidSurface,
+    onSurface = VoidTextPrimary,
+    onSurfaceVariant = VoidTextSecondary,
+    outline = VoidOutline,
+    error = VoidError
 )
 
 @Composable
@@ -48,24 +52,21 @@ fun SheshTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Эти две строки можно удалить, так как enableEdgeToEdge() в MainActivity делает это за вас
-            // window.statusBarColor = Color.Transparent.toArgb()
-            // window.navigationBarColor = Color.Transparent.toArgb()
-
             val insetsController = WindowCompat.getInsetsController(window, view)
+
+            // Ensure status bars are transparent and icons adapt to theme
             insetsController.isAppearanceLightStatusBars = !darkTheme
             insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
-    // Используем стандартную типографику (Sans Serif), она читабельнее Monospace
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography(),
         shapes = Shapes(
-            small = RoundedCornerShape(12.dp),
-            medium = RoundedCornerShape(24.dp),
-            large = RoundedCornerShape(32.dp)
+            small = RoundedCornerShape(8.dp),   // Sharper, technical corners
+            medium = RoundedCornerShape(12.dp),
+            large = RoundedCornerShape(16.dp)
         ),
         content = content
     )
