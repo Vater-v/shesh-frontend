@@ -60,6 +60,8 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .consumeWindowInsets(padding) // Корректная обработка инсетов
+                .imePadding() // UI сдвигается вверх при открытии клавиатуры
                 .padding(horizontal = 24.dp)
                 // Скрываем клавиатуру по тапу на фон
                 .clickable(
@@ -69,14 +71,16 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
+            // "Идентификация" звучит более технологично и в стиле киберпанка, чем просто "С возвращением"
             Text(
-                text = "С возвращением!",
+                text = "Идентификация",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Заполните данные для входа",
+                text = "Введите учетные данные для доступа.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -86,7 +90,7 @@ fun LoginScreen(
             SheshTextField(
                 value = viewModel.identityInput,
                 onValueChange = { viewModel.updateIdentity(it) },
-                label = "Email или Логин",
+                label = "Логин / Email",
                 icon = if (viewModel.isEmailDetected) Icons.Rounded.AlternateEmail else Icons.Rounded.Person,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
