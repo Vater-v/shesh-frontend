@@ -3,8 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id("com.google.gms.google-services")
-}
+    }
 
 android {
     namespace = "com.hmuriy.shesh"
@@ -44,7 +43,6 @@ android {
 
 dependencies {
 
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -66,10 +64,6 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
-    implementation(libs.firebase.auth)
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
     // Хранение настроек (DataStore)
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
