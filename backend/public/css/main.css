@@ -6,7 +6,8 @@
   --color-primary: #00e5ff; /* Cyber Cyan */
   --color-secondary: #d500f9; /* Neon Violet */
   --color-text-primary: #e0e0e0;
-  --color-text-secondary: #858585;
+  /* UPDATED: Increased contrast for better legibility on mobile */
+  --color-text-secondary: #a3a3a3;
   --color-success: #00c853;
 
   /* Typography */
@@ -25,7 +26,6 @@
   --transition: all 0.3s ease;
   --glow-primary: 0 0 12px rgba(0, 229, 255, 0.4);
 }
-
 /* --- Resets & Base --- */
 *,
 *::before,
@@ -303,18 +303,20 @@ ul {
   pointer-events: none;
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments for Hero Section */
 @media (max-width: 968px) {
   .hero__container {
     grid-template-columns: 1fr;
-    text-align: center;
+    text-align: left; /* FIXED: Restore rigid left alignment */
     gap: 3rem;
+    padding-left: 24px; /* Ensure safety padding */
+    padding-right: 24px;
   }
 
   .hero__text-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start; /* FIXED: Align items to start */
   }
 
   .hero__title br {
@@ -322,7 +324,7 @@ ul {
   }
 
   .hero__actions {
-    justify-content: center;
+    justify-content: flex-start; /* FIXED: Align buttons to left */
   }
 
   .phone-mockup__img {
@@ -595,7 +597,7 @@ ul {
   text-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments for Showcase Section */
 @media (max-width: 968px) {
   .showcase {
     padding: 80px 0;
@@ -604,24 +606,27 @@ ul {
   .showcase__container {
     grid-template-columns: 1fr;
     gap: 48px;
-    text-align: center;
+    text-align: left; /* FIXED: Restore rigid left alignment */
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .showcase__content {
-    align-items: center; /* Center align text on mobile */
+    align-items: flex-start; /* FIXED: Align items to start */
   }
 
   .showcase__list {
-    border-left: none;
-    padding-left: 0;
-    align-items: center; /* Center list items */
+    border-left: 1px solid var(--color-border); /* RESTORED: Keep the border */
+    padding-left: 24px; /* RESTORED: Keep padding */
+    align-items: flex-start; /* FIXED: Align list items to start */
   }
 
   .showcase__text {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0; /* FIXED: Remove auto margins */
+    margin-right: 0;
   }
 }
+
 /* --- Footer & Waitlist Section --- */
 .footer {
   background-color: var(--color-bg);
