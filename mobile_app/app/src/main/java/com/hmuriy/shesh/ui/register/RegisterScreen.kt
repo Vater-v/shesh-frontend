@@ -4,6 +4,7 @@ package com.hmuriy.shesh.ui.register
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,7 +44,7 @@ fun RegisterScreen(
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
 
-    // FIX 1: Check property isSuccess instead of type checking (RegisterUiState is a data class)
+    // Observe success state
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) onRegisterSuccess()
     }
@@ -55,7 +56,7 @@ fun RegisterScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Назад")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -66,22 +67,24 @@ fun RegisterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .consumeWindowInsets(padding) // Proper insets handling
+                .imePadding() // Keyboard awareness
                 .padding(horizontal = 24.dp)
                 .verticalScroll(scrollState)
                 // Clear focus when tapping background
                 .clickable(
                     indication = null,
-                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    interactionSource = remember { MutableInteractionSource() }
                 ) { focusManager.clearFocus() }
         ) {
             Text(
-                text = "New Identity",
+                text = "Новая личность",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Select your security protocol.",
+                text = "Выберите протокол безопасности.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -98,13 +101,13 @@ fun RegisterScreen(
                     .padding(4.dp)
             ) {
                 CuteTab(
-                    text = "Personal",
+                    text = "Личный",
                     selected = viewModel.selectedTabIndex == 0,
                     onClick = { viewModel.switchTab(0) },
                     modifier = Modifier.weight(1f)
                 )
                 CuteTab(
-                    text = "Anonymous",
+                    text = "Аноним",
                     selected = viewModel.selectedTabIndex == 1,
                     onClick = { viewModel.switchTab(1) },
                     modifier = Modifier.weight(1f)
@@ -131,15 +134,14 @@ fun RegisterScreen(
                     if (targetIndex == 0) {
                         SheshTextField(
                             value = viewModel.email,
-                            // FIX 2: Use updateEmail() because setter is private
                             onValueChange = { viewModel.updateEmail(it) },
-                            label = "Email Address",
+                            label = "Email",
                             icon = Icons.Rounded.AlternateEmail,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
                             ),
-                            // FIX 3: Check uiState.error property
+                            // Logic depends on ViewModel error string containing "Email"
                             isError = uiState.error?.contains("Email", true) == true
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -147,9 +149,8 @@ fun RegisterScreen(
 
                     SheshTextField(
                         value = viewModel.username,
-                        // FIX 2: Use updateUsername()
                         onValueChange = { viewModel.updateUsername(it) },
-                        label = if (targetIndex == 0) "Username" else "Alias",
+                        label = if (targetIndex == 0) "Имя пользователя" else "Псевдоним",
                         icon = if (targetIndex == 0) Icons.Rounded.Person else Icons.Rounded.Shield,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                     )
@@ -158,9 +159,8 @@ fun RegisterScreen(
 
                     SheshTextField(
                         value = viewModel.password,
-                        // FIX 2: Use updatePassword()
                         onValueChange = { viewModel.updatePassword(it) },
-                        label = "Password",
+                        label = "Пароль",
                         icon = Icons.Rounded.VpnKey,
                         isPassword = true,
                         keyboardOptions = KeyboardOptions(
@@ -196,7 +196,7 @@ fun RegisterScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Anonymous accounts cannot be recovered if the password is lost. Encryption keys are generated locally.",
+                            text = "Анонимные аккаунты невозможно восстановить при утере пароля. Ключи шифрования генерируются локально.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -205,7 +205,6 @@ fun RegisterScreen(
             }
 
             // General Error Message
-            // FIX 4: Check if error is not null
             if (uiState.error != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -218,12 +217,11 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             SheshButton(
-                text = if(viewModel.selectedTabIndex == 0) "Create Account" else "Initialize ID",
+                text = if(viewModel.selectedTabIndex == 0) "Создать аккаунт" else "Сгенерировать ID",
                 onClick = {
                     focusManager.clearFocus()
                     viewModel.register()
                 },
-                // FIX 5: Check isLoading boolean property
                 isLoading = uiState.isLoading,
                 containerColor = if(viewModel.selectedTabIndex == 1) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
             )
