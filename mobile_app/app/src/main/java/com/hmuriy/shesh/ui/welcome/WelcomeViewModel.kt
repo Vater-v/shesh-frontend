@@ -1,3 +1,4 @@
+//./ui/welcome/WelcomeViewModel.kt
 package com.hmuriy.shesh.ui.welcome
 
 import android.util.Log

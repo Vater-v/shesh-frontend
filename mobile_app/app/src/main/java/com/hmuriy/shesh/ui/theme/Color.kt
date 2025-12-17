@@ -1,3 +1,4 @@
+//./ui/theme/Color.kt
 package com.hmuriy.shesh.ui.theme
 
 import androidx.compose.ui.graphics.Color

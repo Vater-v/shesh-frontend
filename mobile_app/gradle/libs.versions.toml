@@ -1,3 +1,4 @@
+#libs.versions.toml
 [versions]
 agp = "8.13.2"
 kotlin = "2.0.0"

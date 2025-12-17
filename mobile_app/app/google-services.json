@@ -12,7 +12,20 @@
           "package_name": "com.hmuriy.shesh"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "325529913880-jgmvi9bfh3ng0ftum2vphagdu26v3t9v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hmuriy.shesh",
+            "certificate_hash": "fc797b8d3e212678b31871a51a2905a279293407"
+          }
+        },
+        {
+          "client_id": "325529913880-g4dqacc0iv8k6i9jn9u9l9284gudotsr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAwU-NQc-F2kJQ-7RzeezHFRlmPeWuizVg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325529913880-g4dqacc0iv8k6i9jn9u9l9284gudotsr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

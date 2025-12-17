@@ -1,3 +1,4 @@
+//./MainViewModel.kt
 package com.hmuriy.shesh
 
 import android.app.Application

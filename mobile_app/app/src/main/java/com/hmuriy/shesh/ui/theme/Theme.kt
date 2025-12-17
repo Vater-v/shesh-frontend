@@ -1,3 +1,4 @@
+//./ui/theme/Theme.kt
 package com.hmuriy.shesh.ui.theme
 
 import android.app.Activity

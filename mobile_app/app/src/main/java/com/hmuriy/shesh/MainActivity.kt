@@ -1,3 +1,4 @@
+//./MainActivity.kt
 package com.hmuriy.shesh
 
 import android.os.Bundle
