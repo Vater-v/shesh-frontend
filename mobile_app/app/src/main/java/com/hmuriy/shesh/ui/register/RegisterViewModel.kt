@@ -1,3 +1,4 @@
+//./ui/register/RegisterViewModel.kt
 package com.hmuriy.shesh.ui.register
 
 import androidx.compose.runtime.getValue
@@ -68,9 +69,9 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun validate(): String? {
-        if (username.isBlank() || password.isBlank()) return "Please fill all mandatory fields"
-        if (selectedTabIndex == 0 && (email.isBlank() || !email.contains("@"))) return "Invalid Email format"
-        if (password.length < 6) return "Passkey must be at least 6 characters"
+        if (username.isBlank() || password.isBlank()) return "Заполните все обязательные поля"
+        if (selectedTabIndex == 0 && (email.isBlank() || !email.contains("@"))) return "Некорректный формат Email"
+        if (password.length < 6) return "Пароль должен содержать минимум 6 символов"
         return null
     }
 }
