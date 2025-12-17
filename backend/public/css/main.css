@@ -1,1 +1,171 @@
+:root {
+  /* Design System: Deep Void + Swiss Design */
+  --color-bg: #050505; /* True Abyss */
+  --color-surface: #121212; /* Deep Charcoal */
+  --color-border: #333333;
+  --color-primary: #00e5ff; /* Cyber Cyan */
+  --color-secondary: #d500f9; /* Neon Violet */
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #858585;
+  --color-success: #00c853;
 
+  /* Typography */
+  --font-family: "Inter", sans-serif;
+  --fw-light: 300;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  /* Spacing & Layout */
+  --container-width: 1200px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --spacing-unit: 8px;
+
+  /* Animation */
+  --transition: all 0.3s ease;
+  --glow-primary: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+/* --- Resets & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+ul {
+  list-style: none;
+}
+
+/* --- Layout Utilities --- */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* --- Header Styling --- */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: rgba(5, 5, 5, 0.85); /* Semi-transparent Deep Void */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 0;
+}
+
+.header__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --- Logo --- */
+.header__logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo__text {
+  font-weight: var(--fw-bold);
+  font-size: 1.5rem;
+  letter-spacing: 0.1em; /* Wide tracking for technical look */
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+}
+
+.logo__text::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-primary);
+  margin-left: 4px;
+  border-radius: 50%;
+  vertical-align: middle;
+  box-shadow: 0 0 8px var(--color-primary);
+}
+
+/* --- Navigation --- */
+.header__nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-list__link {
+  font-size: 0.95rem;
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+}
+
+.nav-list__link:hover {
+  color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family);
+  font-weight: var(--fw-bold);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+}
+
+/* Outline Button Variant (Ghost) */
+.btn--outline {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 10px 20px;
+}
+
+.btn--outline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--glow-primary), inset 0 0 10px rgba(0, 229, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn--small {
+  font-size: 0.8rem;
+  padding: 8px 16px;
+}
