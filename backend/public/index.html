@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SHESH — Мобильное приложение для автоматизации и драйва. Укроти своих внутренних демонов."
+    />
     <title>SHESH — Control Your Daemons</title>
+
     <link rel="stylesheet" href="css/main.css" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap"
       rel="stylesheet"
@@ -15,23 +21,30 @@
   <body>
     <header class="header">
       <div class="container header__container">
-        <a href="#" class="header__logo">
+        <a href="/" class="header__logo" aria-label="SHESH Главная">
           <span class="logo__text">SHESH.</span>
         </a>
 
-        <nav class="header__nav">
-          <a href="#waitlist" class="btn btn--small btn--outline"
-            >Beta Access</a
-          >
+        <nav class="header__nav" aria-label="Main Navigation">
+          <ul class="nav-list">
+            <li class="nav-list__item">
+              <a href="#login" class="nav-list__link">Войти</a>
+            </li>
+            <li class="nav-list__item">
+              <a href="#signup" class="btn btn--small btn--outline"
+                >Создать аккаунт</a
+              >
+            </li>
+          </ul>
         </nav>
       </div>
     </header>
 
     <main class="main-content">
-      <section class="hero">
+      <section class="hero" aria-labelledby="hero-title">
         <div class="container hero__container">
           <div class="hero__text-content">
-            <h1 class="hero__title">
+            <h1 id="hero-title" class="hero__title">
               Укроти своих <br />
               <span class="text-accent">внутренних демонов</span>
             </h1>
@@ -40,8 +53,10 @@
               твоя игра, твое спокойствие.
             </p>
             <div class="hero__actions">
-              <button class="btn btn--primary">Попробовать сейчас</button>
-              <button class="btn btn--text">Узнать больше ↓</button>
+              <a href="#waitlist" class="btn btn--primary"
+                >Попробовать сейчас</a
+              >
+              <a href="#features" class="btn btn--text">Узнать больше ↓</a>
             </div>
           </div>
 
@@ -49,25 +64,27 @@
             <div class="phone-mockup">
               <img
                 src="https://placehold.co/320x640/1a1a1a/FFF?text=App+Interface"
-                alt="App Interface Mockup"
+                alt="Интерфейс приложения SHESH"
                 class="phone-mockup__img"
+                width="320"
+                height="640"
               />
-              <div class="phone-mockup__glow"></div>
+              <div class="phone-mockup__glow" aria-hidden="true"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="features" id="features">
+      <section class="features" id="features" aria-labelledby="features-title">
         <div class="container">
-          <div class="section-header">
-            <h2 class="section-title">Shesh Automation</h2>
+          <header class="section-header">
+            <h2 id="features-title" class="section-title">Shesh Automation</h2>
             <p class="section-desc">Минимализм снаружи. Монстр внутри.</p>
-          </div>
+          </header>
 
           <div class="features__grid">
             <article class="feature-card">
-              <div class="feature-card__icon">
+              <div class="feature-card__icon" aria-hidden="true">
                 <span>⚡</span>
               </div>
               <h3 class="feature-card__title">Total Control</h3>
@@ -78,7 +95,7 @@
             </article>
 
             <article class="feature-card">
-              <div class="feature-card__icon">
+              <div class="feature-card__icon" aria-hidden="true">
                 <span>👁️</span>
               </div>
               <h3 class="feature-card__title">Silent Mode</h3>
@@ -89,7 +106,7 @@
             </article>
 
             <article class="feature-card">
-              <div class="feature-card__icon">
+              <div class="feature-card__icon" aria-hidden="true">
                 <span>💎</span>
               </div>
               <h3 class="feature-card__title">Pure UI</h3>
@@ -101,25 +118,30 @@
         </div>
       </section>
 
-      <section class="showcase">
+      <section class="showcase" aria-labelledby="showcase-title">
         <div class="container showcase__container">
           <div class="showcase__image-wrapper">
             <img
               src="https://placehold.co/600x400/1a1a1a/FFF?text=Dashboard+Metrics"
-              alt="Dashboard"
+              alt="Панель метрик и аналитики"
               class="showcase__img"
+              width="600"
+              height="400"
+              loading="lazy"
             />
           </div>
           <div class="showcase__content">
-            <h2 class="showcase__title">Красота в цифрах</h2>
+            <h2 id="showcase-title" class="showcase__title">
+              Красота в цифрах
+            </h2>
             <p class="showcase__text">
               Продвинутая аналитика, которая не перегружает. Смотри, как растут
               твои показатели, наслаждаясь чашкой кофе.
             </p>
             <ul class="showcase__list">
-              <li>— Кастомные сценарии</li>
-              <li>— Игра мирового класса</li>
-              <li>— Рост вместе с SHESH</li>
+              <li class="showcase__list-item">— Кастомные сценарии</li>
+              <li class="showcase__list-item">— Игра мирового класса</li>
+              <li class="showcase__list-item">— Рост вместе с SHESH</li>
             </ul>
           </div>
         </div>
@@ -134,9 +156,12 @@
             Оставь почту, чтобы получить доступ одним из первых.
           </p>
 
-          <form class="subscribe-form" action="#">
+          <form class="subscribe-form" action="#" method="POST">
+            <label for="email" class="visually-hidden">Ваш Email</label>
             <input
               type="email"
+              id="email"
+              name="email"
               class="subscribe-form__input"
               placeholder="daemon@master.com"
               required
@@ -149,10 +174,12 @@
 
         <div class="footer__bottom">
           <p class="copyright">&copy; 2025 SHESH. All systems operational.</p>
-          <div class="footer__links">
-            <a href="#" class="footer__link">Telegram</a>
-            <a href="#" class="footer__link">Download</a>
-          </div>
+          <nav class="footer__nav" aria-label="Footer Links">
+            <ul class="footer__links-list">
+              <li><a href="#" class="footer__link">Telegram</a></li>
+              <li><a href="#" class="footer__link">Download</a></li>
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>
