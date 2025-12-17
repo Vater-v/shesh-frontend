@@ -1,4 +1,4 @@
-//./ui/welkome/WelcomeScreen.kt
+//./ui/welcome/WelcomeScreen.kt
 package com.hmuriy.shesh.ui.welcome
 
 import androidx.compose.animation.core.*
@@ -41,7 +41,7 @@ fun WelcomeScreen(
         ) {
             Icon(
                 imageVector = if (isDarkTheme) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,
-                contentDescription = "Theme",
+                contentDescription = "Сменить тему",
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }
@@ -68,8 +68,9 @@ fun WelcomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Translated to match Cyberpunk/Tech aesthetic
             Text(
-                text = "Total control. Zero latency.\nThe architecture of tomorrow.",
+                text = "Абсолютный контроль. Нулевая задержка.\nАрхитектура будущего.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -79,7 +80,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             SheshButton(
-                text = "Log In",
+                text = "Войти",
                 onClick = onLoginClick
             )
 
@@ -88,12 +89,14 @@ fun WelcomeScreen(
             // Secondary Action
             OutlinedButton(
                 onClick = onRegisterClick,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = MaterialTheme.shapes.medium,
-                border = null // Minimalist look
+                border = null // Minimalist look (Ghost button)
             ) {
                 Text(
-                    "Create Account",
+                    text = "Создать аккаунт",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
