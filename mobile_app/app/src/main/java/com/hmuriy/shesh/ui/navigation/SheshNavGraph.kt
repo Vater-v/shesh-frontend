@@ -1,6 +1,8 @@
 //./ui/navigation/SheshNavGraph.kt
 package com.hmuriy.shesh.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -26,21 +28,23 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun SheshNavGraph(
-    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     onThemeToggle: () -> Unit,
     isDarkTheme: Boolean
 ) {
-    // CHANGED: Use Surface to handle background color and content color globally
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         NavHost(
             navController = navController,
-            startDestination = Screen.Welcome.route
+            startDestination = Screen.Welcome.route,
+            // Глобальная анимация переходов (Slide Left/Right)
+            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(400)) },
+            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(400)) },
+            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(400)) },
+            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(400)) }
         ) {
-            // --- Landing (Входной шлюз) ---
             composable(Screen.Welcome.route) {
                 WelcomeScreen(
                     onLoginClick = { navController.navigate(Screen.Login.route) },
@@ -49,8 +53,6 @@ fun SheshNavGraph(
                     isDarkTheme = isDarkTheme
                 )
             }
-
-            // --- The Gateway (Авторизация) ---
             composable(Screen.Login.route) {
                 LoginScreen(
                     onBackClick = { navController.popBackStack() },
@@ -61,8 +63,6 @@ fun SheshNavGraph(
                     }
                 )
             }
-
-            // --- The Uplink (Регистрация) ---
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onBackClick = { navController.popBackStack() },
@@ -73,17 +73,15 @@ fun SheshNavGraph(
                     }
                 )
             }
-
-            // --- Home (Система) ---
             composable(Screen.Home.route) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "СИСТЕМА В СЕТИ. ДОСТУП РАЗРЕШЕН.",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.headlineMedium
+                        text = "Добро пожаловать домой! 🏠",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
