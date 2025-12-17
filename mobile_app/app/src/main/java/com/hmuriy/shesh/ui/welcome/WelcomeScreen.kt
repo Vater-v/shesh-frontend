@@ -1,3 +1,4 @@
+//./ui/welkome/WelcomeScreen.kt
 package com.hmuriy.shesh.ui.welcome
 
 import androidx.compose.animation.core.*
