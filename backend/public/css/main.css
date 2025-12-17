@@ -34,10 +34,11 @@
   margin: 0;
   padding: 0;
 }
-
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* ADDED: Ensures content isn't hidden behind the fixed header on scroll */
+  scroll-padding-top: 80px;
 }
 
 body {
@@ -846,9 +847,10 @@ ul {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    background-color: rgba(5, 5, 5, 0.95); /* Deep Void transparency */
-    backdrop-filter: blur(16px); /* Glassmorphism */
+    /* CHANGED: 100vh -> 100dvh to account for dynamic mobile browser bars */
+    height: 100dvh;
+    background-color: rgba(5, 5, 5, 0.95);
+    backdrop-filter: blur(16px);
     z-index: 1050;
 
     display: flex;
