@@ -106,8 +106,6 @@ ul {
 .header__logo:hover .logo__text {
   text-shadow: 0 0 5px var(--color-text-primary),
     0 0 20px var(--color-text-primary);
-  /* Опционально: легкое изменение цвета, если есть акцентный цвет */
-  /* color: var(--color-accent); */
 }
 /* --- Navigation --- */
 .header__nav {
@@ -791,5 +789,102 @@ ul {
 
   .footer__cta-box {
     padding: 48px 20px;
+  }
+}
+/* --- Mobile Navigation & Hamburger --- */
+
+/* Default: Hide Hamburger on Desktop */
+.mobile-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1100; /* Above the nav drawer */
+}
+
+/* Hamburger Lines */
+.hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  margin: 5px 0;
+  transition: var(--transition);
+  border-radius: 2px;
+}
+
+/* Mobile Breakpoint */
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+
+  /* Animate Hamburger to X */
+  .mobile-toggle.is-active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+    background-color: var(--color-primary);
+  }
+
+  .mobile-toggle.is-active .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .mobile-toggle.is-active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+    background-color: var(--color-primary);
+  }
+
+  /* Fullscreen Drawer Styling */
+  .header__nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(5, 5, 5, 0.95); /* Deep Void transparency */
+    backdrop-filter: blur(16px); /* Glassmorphism */
+    z-index: 1050;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Animation State: Hidden */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Cyberpunk easing */
+  }
+
+  /* Animation State: Open */
+  .header__nav.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Mobile List Layout */
+  .nav-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+  }
+
+  /* Mobile Links Typography */
+  .nav-list__link {
+    font-size: 1.5rem;
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.05em;
+    color: var(--color-text-primary);
+  }
+
+  /* Button in Mobile Menu */
+  .nav-list__item .btn {
+    width: 100%;
+    min-width: 200px;
+    font-size: 1rem;
+    padding: 16px 32px;
   }
 }
