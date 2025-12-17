@@ -17,11 +17,11 @@ class RegisterViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // 0 = Standard, 1 = Stealth
+    // 0 = Личный, 1 = Анонимный
     var selectedTabIndex by mutableIntStateOf(0)
         private set
 
-    // Fields
+    // Поля ввода
     var email by mutableStateOf("")
     var username by mutableStateOf("")
     var password by mutableStateOf("")
@@ -29,20 +29,20 @@ class RegisterViewModel : ViewModel() {
     fun switchTab(index: Int) {
         selectedTabIndex = index
         _uiState.value = RegisterUiState.Idle
-        // Clear email in Stealth mode
+        // Очищаем email при переключении на анонимный режим
         if (index == 1) email = ""
     }
 
     fun register() {
-        // Validation
+        // Валидация общих полей
         if (username.isBlank() || password.isBlank()) {
-            _uiState.value = RegisterUiState.Error("ДАННЫЕ_ОТСУТСТВУЮТ")
+            _uiState.value = RegisterUiState.Error("Пожалуйста, заполните все обязательные поля")
             return
         }
 
-        // Standard mode requires Email
+        // Валидация Email только для стандартного режима
         if (selectedTabIndex == 0 && (email.isBlank() || !email.contains("@"))) {
-            _uiState.value = RegisterUiState.Error("НЕКОРРЕКТНЫЙ_ПРОТОКОЛ_EMAIL")
+            _uiState.value = RegisterUiState.Error("Некорректный формат Email")
             return
         }
 

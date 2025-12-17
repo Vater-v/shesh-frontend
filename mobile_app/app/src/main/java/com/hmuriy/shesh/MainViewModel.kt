@@ -14,7 +14,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val themeStore = ThemeStore(application)
 
-    // Default to Dark Theme (Cyberpunk) if not set
+    // По умолчанию используем темную тему, если настройка не сохранена
     val isDarkTheme: StateFlow<Boolean> = themeStore.isDarkTheme
         .stateIn(
             scope = viewModelScope,
