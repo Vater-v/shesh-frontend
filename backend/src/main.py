@@ -1,29 +1,41 @@
 # backend/src/main.py
 import uvicorn
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
-app = FastAPI(title="Shesh Backend")
+# --- Импорты модуля Auth ---
+# Предполагается, что папка modules лежит рядом с main.py
+from modules.auth.router import router as auth_router
+from modules.auth.database import init_db
 
 # --- Настройка путей ---
-# Определяем путь к корню проекта (backend) относительно текущего файла (backend/src/main.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = BASE_DIR / "public"
 
-# --- Монтирование статики ---
-# index.html запрашивает ресурсы по путям "css/..." и "js/..."
-# Поэтому мы монтируем соответствующие папки из public
-app.mount("/css", StaticFiles(directory=PUBLIC_DIR / "css"), name="css")
+# --- Lifespan (События жизненного цикла) ---
+# Эта функция запустится перед стартом приложения и создаст таблицы БД
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Создаем таблицы (users, sessions), если их нет
+    await init_db()
+    yield
+    # Здесь можно добавить логику закрытия соединений при остановке сервера (если нужно)
 
-# Если/когда вы добавите JS файлы в backend/public/js:
-# app.mount("/js", StaticFiles(directory=PUBLIC_DIR / "js"), name="js")
+# --- Инициализация приложения ---
+app = FastAPI(title="Shesh Backend", lifespan=lifespan)
+
+# --- Подключение роутеров ---
+app.include_router(auth_router)
+
+# --- Монтирование статики ---
+app.mount("/css", StaticFiles(directory=PUBLIC_DIR / "css"), name="css")
 
 # --- Главный роут ---
 @app.get("/")
 async def read_index():
-    # Возвращаем сам файл index.html
     return FileResponse(PUBLIC_DIR / "index.html")
 
 if __name__ == "__main__":
