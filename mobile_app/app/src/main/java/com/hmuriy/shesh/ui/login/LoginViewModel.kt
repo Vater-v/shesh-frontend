@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
@@ -27,33 +28,39 @@ class LoginViewModel : ViewModel() {
 
     fun updateIdentity(input: String) {
         identityInput = input
-        if (_uiState.value is LoginUiState.Error) _uiState.value = LoginUiState.Idle
+        clearError()
     }
 
     fun updatePassword(input: String) {
         password = input
-        if (_uiState.value is LoginUiState.Error) _uiState.value = LoginUiState.Idle
+        clearError()
+    }
+
+    private fun clearError() {
+        if (_uiState.value is LoginUiState.Error) {
+            _uiState.update { LoginUiState.Idle }
+        }
     }
 
     fun login() {
         if (identityInput.isBlank() || password.isBlank()) {
-            _uiState.value = LoginUiState.Error("Пожалуйста, заполните все поля")
+            _uiState.update { LoginUiState.Error("Требуются полные учетные данные") }
             return
         }
 
         viewModelScope.launch {
-            _uiState.value = LoginUiState.Loading
-            delay(1500)
+            _uiState.update { LoginUiState.Loading }
+            delay(1500) // Имитация проверки в базе данных
             if (password.length >= 6) {
-                _uiState.value = LoginUiState.Success
+                _uiState.update { LoginUiState.Success }
             } else {
-                _uiState.value = LoginUiState.Error("Неверный логин или пароль")
+                _uiState.update { LoginUiState.Error("Доступ запрещен: Неверные данные") }
             }
         }
     }
 
     fun resetState() {
-        _uiState.value = LoginUiState.Idle
+        _uiState.update { LoginUiState.Idle }
         identityInput = ""
         password = ""
     }
