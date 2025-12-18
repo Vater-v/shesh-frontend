@@ -887,3 +887,65 @@ ul {
     padding: 16px 32px;
   }
 }
+/* --- Authentication & New Styles --- */
+
+/* 1. Navigation Separator */
+.nav-separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-border);
+  margin: 0 8px;
+}
+
+/* 2. Secondary Button (Violet) */
+/* Designed for "Login" actions to differentiate from "Sign Up" */
+.btn--secondary {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn--secondary:hover {
+  border-color: var(--color-secondary); /* Neon Violet */
+  color: var(--color-secondary);
+  /* Violet Glow */
+  box-shadow: 0 0 15px rgba(213, 0, 249, 0.3),
+    inset 0 0 10px rgba(213, 0, 249, 0.05);
+  transform: translateY(-2px);
+  text-shadow: 0 0 8px rgba(213, 0, 249, 0.4);
+}
+
+/* 3. Hero Layout Adjustments */
+.hero__sub-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 968px) {
+  /* Hide separator in mobile menu */
+  .nav-separator {
+    display: none;
+  }
+
+  /* Stack Hero buttons vertically */
+  .hero__actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Center the tertiary link */
+  .hero__sub-actions {
+    justify-content: center;
+  }
+}
