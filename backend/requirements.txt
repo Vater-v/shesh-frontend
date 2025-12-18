@@ -6,6 +6,6 @@ fastapi
 sqlalchemy
 aiosqlite
 pydantic-settings
-passlib[bcrypt]
 email-validator
 aiofiles
+bcrypt==4.0.1

@@ -6,13 +6,11 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-# Импортируем модуль auth. Убедитесь, что папка auth существует и содержит __init__.py
-from auth.router import router as auth_router
-from auth.database import init_db
-
+from modules.auth.router import router as auth_router
+from modules.auth.database import init_db
 # Пути к папкам
 BASE_DIR = Path(__file__).resolve().parent
-PUBLIC_DIR = BASE_DIR / "public"  # HTML/CSS/JS должны лежать здесь
+PUBLIC_DIR = BASE_DIR.parent / "public"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
