@@ -1,3 +1,12 @@
+/**
+ * SHESH SYSTEM - Authentication/Registration Module
+ */
+
+// Проверка авторизации: редирект, если сессия уже активна
+if (localStorage.getItem("access_token")) {
+  window.location.href = "/";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // --- Config ---
   const API_ENDPOINT = "/auth/register";
@@ -22,10 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const strengthBar = document.querySelector(".strength-bar");
 
   // State
-  let currentMode = "classic"; // 'classic' | 'anon'
+  let currentMode = "classic";
 
   // --- Utils ---
-  // Debounce (предотвращает частый вызов валидации при наборе текста)
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -61,8 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       inputEmail.required = true;
       inputUsername.required = false;
-
-      // Очистка скрытого поля и сброс классов валидации
       inputUsername.value = "";
       inputUsername.classList.remove("valid", "invalid");
 
@@ -151,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     formFeedback.className = `form-message ${type}`;
     formFeedback.classList.remove("hidden");
 
-    // Эффект тряски при ошибке
     if (type === "error") {
       authCard.classList.add("shake");
       setTimeout(() => authCard.classList.remove("shake"), 400);
@@ -170,8 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ВАЖНО: Отправляем null для пустого поля,
-    // чтобы валидатор Pydantic не ругался.
     const payload = {
       password: password,
       email: null,
@@ -196,7 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
       payload.login = login;
     }
 
-    // Отправка
     submitBtn.classList.add("loading");
     submitBtn.disabled = true;
 
@@ -213,25 +215,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
 
       if (!response.ok) {
-        // Парсинг ошибок от FastAPI (Pydantic возвращает массив detail)
         let msg = "Ошибка сервера";
-
         if (data.detail) {
           if (Array.isArray(data.detail)) {
-            // Это ошибка валидации Pydantic (422)
-            // Берем первую ошибку из массива
-            const err = data.detail[0];
-            msg = err.msg;
-
-            // Перевод частых технических сообщений на русский
-            if (msg.includes("String should have at least"))
-              msg = "Слишком короткое значение";
-            if (msg.includes("value is not a valid email"))
-              msg = "Некорректный формат email";
-            if (msg.includes("Field required"))
-              msg = "Обязательное поле не заполнено";
+            msg = data.detail[0].msg;
           } else {
-            // Обычная HTTP ошибка (400/409)
             msg = data.detail;
             if (msg.includes("already exists") || msg.includes("taken")) {
               msg = "Пользователь с такими данными уже существует";
@@ -241,16 +229,13 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(msg);
       }
 
-      // Успех
       showFeedback("Успешная регистрация! Вход...", "success");
 
-      // Сохраняем токены
       if (data.access_token) {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
       }
 
-      // Редирект
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);
