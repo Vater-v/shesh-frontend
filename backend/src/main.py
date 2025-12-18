@@ -51,5 +51,10 @@ async def read_register():
 async def read_login():
     return FileResponse(PUBLIC_DIR / "login.html")
 
+@app.get("/cabinet")
+@app.get("/cabinet.html")
+async def read_cabinet():
+    return FileResponse(PUBLIC_DIR / "cabinet.html")
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5006, reload=True)

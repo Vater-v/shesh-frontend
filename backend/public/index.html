@@ -68,14 +68,22 @@
 
             <li class="nav-list__item nav-separator" aria-hidden="true"></li>
 
-            <li class="nav-list__item">
+            <li class="nav-list__item guest-only">
               <a href="/login.html" class="nav-list__link">Вход</a>
             </li>
+            <li class="nav-list__item guest-only">
+              <a href="/register.html" class="btn btn--small btn--primary"
+                >Начать работу</a
+              >
+            </li>
 
-            <li class="nav-list__item">
-              <a href="/register.html" class="btn btn--small btn--primary">
-                Начать работу
-              </a>
+            <li class="nav-list__item user-only hidden">
+              <a href="/cabinet.html" class="nav-list__link">Личный кабинет</a>
+            </li>
+            <li class="nav-list__item user-only hidden">
+              <button id="logoutBtn" class="btn btn--small btn--outline">
+                Выйти
+              </button>
             </li>
           </ul>
         </nav>

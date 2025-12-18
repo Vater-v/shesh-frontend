@@ -1,0 +1,41 @@
+<main class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Ваш профиль</h1>
+    <div id="user-info">
+      <p class="auth-subtitle">Загрузка данных...</p>
+    </div>
+    <a href="/" class="btn btn--outline" style="margin-top: 20px">На главную</a>
+  </div>
+</main>
+
+<script>
+  async function loadProfile() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      window.location.href = "/login.html";
+      return;
+    }
+
+    try {
+      const response = await fetch("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const user = await response.json();
+        document.getElementById("user-info").innerHTML = `
+          <p><strong>Логин:</strong> ${user.login || "Не указан"}</p>
+          <p><strong>Email:</strong> ${user.email || "Не указан"}</p>
+          <p><strong>Статус:</strong> ${
+            user.is_verified ? "Верифицирован" : "Ожидает подтверждения"
+          }</p>
+        `;
+      } else {
+        throw new Error("Сессия истекла");
+      }
+    } catch (err) {
+      localStorage.removeItem("access_token");
+      window.location.href = "/login.html";
+    }
+  }
+  document.addEventListener("DOMContentLoaded", loadProfile);
+</script>

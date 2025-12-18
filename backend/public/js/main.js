@@ -1,19 +1,19 @@
 /**
  * SHESH SYSTEM - Global UI Controller
- * Handles: Mobile Navigation, Spotlight Effects, and System Logging.
+ * Handles: Mobile Navigation, Spotlight Effects, Auth State, and System Logging.
  */
 const SheshUI = (() => {
   "use strict";
 
-  // State management for UI components
+  // Состояние UI компонентов
   const state = {
     isNavOpen: false,
     lastSpotlightUpdate: 0,
   };
 
   /**
-   * Mobile Navigation Logic
-   * Manages ARIA states and scroll-locking for the terminal menu.
+   * Логика мобильной навигации
+   * Управляет состояниями ARIA и блокировкой прокрутки для терминального меню.
    */
   const initMobileNav = () => {
     const navToggle = document.querySelector(".mobile-toggle");
@@ -28,7 +28,7 @@ const SheshUI = (() => {
       navToggle.classList.toggle("is-active", open);
       navMenu.classList.toggle("is-open", open);
 
-      // Prevent background scrolling when menu is active
+      // Запрет прокрутки фона при активном меню
       body.style.overflow = open ? "hidden" : "";
     };
 
@@ -37,7 +37,7 @@ const SheshUI = (() => {
       toggleMenu(!state.isNavOpen);
     });
 
-    // Close menu on link click or clicking outside
+    // Закрытие меню при клике на ссылку или вне меню
     document.addEventListener("click", (e) => {
       if (state.isNavOpen && !navMenu.contains(e.target)) {
         toggleMenu(false);
@@ -46,16 +46,15 @@ const SheshUI = (() => {
   };
 
   /**
-   * Spotlight Effect
-   * Optimized mouse-tracking gradient for interactive cards.
+   * Эффект прожектора (Spotlight)
+   * Оптимизированный градиент следования за мышью для интерактивных карточек.
    */
   const initSpotlight = () => {
     const cards = document.querySelectorAll(
-      ".feature-card, .terminal, .auth-form"
+      ".feature-card, .terminal, .auth-form, .auth-card"
     );
 
     const updateSpotlight = (e) => {
-      // Throttled using requestAnimationFrame for performance
       requestAnimationFrame(() => {
         cards.forEach((card) => {
           const rect = card.getBoundingClientRect();
@@ -74,7 +73,46 @@ const SheshUI = (() => {
   };
 
   /**
-   * Stylized System Logging
+   * Управление состоянием авторизации в UI
+   * Переключает видимость элементов для гостей и зарегистрированных пользователей.
+   */
+  const updateAuthUI = () => {
+    const token = localStorage.getItem("access_token");
+    const guestElements = document.querySelectorAll(".guest-only");
+    const userElements = document.querySelectorAll(".user-only");
+
+    if (token) {
+      // Пользователь авторизован
+      guestElements.forEach((el) => el.classList.add("hidden"));
+      userElements.forEach((el) => el.classList.remove("hidden"));
+    } else {
+      // Пользователь — гость
+      guestElements.forEach((el) => el.classList.remove("hidden"));
+      userElements.forEach((el) => el.classList.add("hidden"));
+    }
+  };
+
+  /**
+   * Логика выхода из системы
+   * Очищает токены и обновляет состояние страницы.
+   */
+  const initLogout = () => {
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        // Удаление данных из хранилища
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
+        // Редирект на главную или перезагрузка для обновления UI
+        window.location.href = "/";
+      });
+    }
+  };
+
+  /**
+   * Стилизованное логирование статуса системы
    */
   const logSystemStatus = () => {
     const styles = {
@@ -92,10 +130,12 @@ const SheshUI = (() => {
     init: () => {
       initMobileNav();
       initSpotlight();
+      updateAuthUI();
+      initLogout();
       logSystemStatus();
     },
   };
 })();
 
-// Initialize on DOM Ready
+// Инициализация при готовности DOM
 document.addEventListener("DOMContentLoaded", SheshUI.init);
