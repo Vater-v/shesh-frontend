@@ -128,3 +128,12 @@ async def verify_email(
 ):
     await svc.verify_email(payload.token)
     return {"message": "Email verified successfully"}
+
+@router.patch("/me", response_model=schemas.UserRead)
+async def update_me(
+    payload: schemas.UserUpdate,
+    current_user: models.User = Depends(get_current_user),
+    svc: service.AuthService = Depends(get_auth_service)
+):
+    """Обновление данных текущего профиля."""
+    return await svc.update_user(current_user, payload)

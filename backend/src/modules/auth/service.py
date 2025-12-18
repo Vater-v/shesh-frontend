@@ -214,3 +214,28 @@ class AuthService:
         user.is_verified = True
         user.verification_token = None # One-time use
         await self.db.commit()
+
+    async def update_user(self, user: models.User, payload: schemas.UserUpdate) -> models.User:
+    # 1. Проверка уникальности, если поля предоставлены
+    if payload.login and payload.login != user.login:
+        stmt = select(models.User).where(models.User.login == payload.login)
+        if (await self.db.execute(stmt)).scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Login is already taken")
+        user.login = payload.login
+
+    if payload.email and payload.email != user.email:
+        stmt = select(models.User).where(models.User.email == payload.email)
+        if (await self.db.execute(stmt)).scalar_one_or_none():
+            raise HTTPException(status_code=409, detail="Email is already taken")
+        
+        # При смене Email сбрасываем верификацию
+        user.email = payload.email
+        user.is_verified = False
+        user.verification_token = str(uuid.uuid4())
+        # Опционально: отправить письмо с новым токеном
+        self.mock_email(user.email, "Verify New Email", f"Token: {user.verification_token}")
+
+    await self.db.commit()
+    await self.db.refresh(user)
+    return user
+

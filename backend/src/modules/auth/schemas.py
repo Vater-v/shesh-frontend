@@ -80,3 +80,14 @@ class PasswordChange(BaseModel):
 
 class VerifyEmailRequest(BaseModel):
     token: str
+
+class UserUpdate(BaseModel):
+    login: Optional[str] = Field(None, min_length=3, max_length=50)
+    email: Optional[EmailStr] = Field(None)
+
+    @field_validator('login', 'email', mode='before')
+    @classmethod
+    def empty_string_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
