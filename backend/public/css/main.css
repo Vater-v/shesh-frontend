@@ -6,7 +6,6 @@
   --color-primary: #00e5ff; /* Cyber Cyan */
   --color-secondary: #d500f9; /* Neon Violet */
   --color-text-primary: #e0e0e0;
-  /* UPDATED: Increased contrast for better legibility on mobile */
   --color-text-secondary: #a3a3a3;
   --color-success: #00c853;
 
@@ -23,7 +22,6 @@
   --spacing-unit: 8px;
 
   /* Animation */
-  /* OPTIMIZED: Replaced 'all' with specific properties to prevent layout reflows */
   --transition: color 0.3s ease, background-color 0.3s ease,
     border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease,
     opacity 0.3s ease, filter 0.3s ease, text-shadow 0.3s ease;
@@ -39,11 +37,11 @@
   margin: 0;
   padding: 0;
 }
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  /* ADDED: Ensures content isn't hidden behind the fixed header on scroll */
-  scroll-padding-top: 80px;
+  scroll-padding-top: 100px; /* Offset for header */
 }
 
 body {
@@ -53,6 +51,29 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scroll from glow effects */
+}
+
+/* Cyberpunk Selection Style */
+::selection {
+  background-color: var(--color-primary);
+  color: #000;
+}
+
+/* Custom Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 5px;
+  border: 2px solid var(--color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 
 a {
@@ -80,7 +101,8 @@ ul {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: rgba(5, 5, 5, 0.85); /* Semi-transparent Deep Void */
+  background-color: rgba(5, 5, 5, 0.85);
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
   padding: 16px 0;
@@ -98,12 +120,13 @@ ul {
   align-items: center;
   cursor: pointer;
   transition: transform 0.3s ease;
+  z-index: 1100;
 }
 
 .logo__text {
   font-weight: var(--fw-bold);
   font-size: 1.5rem;
-  letter-spacing: 0.1em; /* Wide tracking for technical look */
+  letter-spacing: 0.1em;
   color: var(--color-text-primary);
   text-transform: uppercase;
   transition: color 0.3s ease, text-shadow 0.3s ease;
@@ -113,6 +136,7 @@ ul {
   text-shadow: 0 0 5px var(--color-text-primary),
     0 0 20px var(--color-text-primary);
 }
+
 /* --- Navigation --- */
 .header__nav {
   display: flex;
@@ -126,9 +150,11 @@ ul {
 }
 
 .nav-list__link {
-  font-size: 0.95rem;
   font-weight: var(--fw-medium);
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
 }
 
 .nav-list__link:hover {
@@ -149,9 +175,9 @@ ul {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.875rem;
+  border: none;
 }
 
-/* Outline Button Variant (Ghost) */
 .btn--outline {
   background-color: transparent;
   border: 1px solid var(--color-border);
@@ -167,13 +193,51 @@ ul {
 }
 
 .btn--small {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   padding: 8px 16px;
 }
-/* --- Hero Section Styles --- */
+
+.btn--primary {
+  background-color: var(--color-primary);
+  color: #050505;
+  padding: 14px 32px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--glow-primary);
+}
+
+.btn--primary:hover {
+  background-color: #33efff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+}
+
+/* Success state for JS interaction */
+.btn--success {
+  background-color: var(--color-success) !important;
+  box-shadow: 0 0 15px var(--color-success) !important;
+  color: #fff !important;
+  pointer-events: none;
+}
+
+.btn--text {
+  color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
+  padding: 10px 0;
+  border-bottom: 1px solid transparent;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.btn--text:hover {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* --- Hero Section --- */
 .hero {
   position: relative;
-  padding: 140px 0 80px; /* Top padding accounts for fixed header */
+  padding: 160px 0 100px;
   overflow: hidden;
   background: radial-gradient(
     circle at 80% 20%,
@@ -189,14 +253,14 @@ ul {
   gap: 4rem;
 }
 
-/* Typography & Content */
 .hero__title {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: var(--fw-bold);
   line-height: 1.1;
   margin-bottom: 1.5rem;
   color: var(--color-text-primary);
-  letter-spacing: 0.02em; /* Technical tracking */
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 .text-accent {
@@ -208,7 +272,7 @@ ul {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: var(--color-primary); /* Fallback */
+  color: var(--color-primary);
   text-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
 }
 
@@ -221,7 +285,6 @@ ul {
   font-weight: var(--fw-light);
 }
 
-/* Action Buttons */
 .hero__actions {
   display: flex;
   align-items: center;
@@ -229,36 +292,6 @@ ul {
   flex-wrap: wrap;
 }
 
-.btn--primary {
-  background-color: var(--color-primary);
-  color: #050505; /* Black text on Cyan for max contrast */
-  padding: 14px 32px;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--glow-primary);
-  border: none;
-}
-
-.btn--primary:hover {
-  background-color: #33efff;
-  transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-}
-
-.btn--text {
-  color: var(--color-text-primary);
-  font-weight: var(--fw-medium);
-  padding: 10px 0;
-  border-bottom: 1px solid transparent;
-  font-size: 0.9rem;
-}
-
-.btn--text:hover {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
-}
-
-/* Visual & Mockup */
 .hero__visual {
   position: relative;
   display: flex;
@@ -290,7 +323,6 @@ ul {
   filter: brightness(0.9);
 }
 
-/* Cyberpunk Glow Effect */
 .phone-mockup__glow {
   position: absolute;
   top: 50%;
@@ -309,20 +341,11 @@ ul {
   pointer-events: none;
 }
 
-/* Responsive Adjustments for Hero Section */
 @media (max-width: 968px) {
   .hero__container {
     grid-template-columns: 1fr;
-    text-align: left; /* FIXED: Restore rigid left alignment */
+    text-align: left;
     gap: 3rem;
-    padding-left: 24px; /* Ensure safety padding */
-    padding-right: 24px;
-  }
-
-  .hero__text-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* FIXED: Align items to start */
   }
 
   .hero__title br {
@@ -330,13 +353,14 @@ ul {
   }
 
   .hero__actions {
-    justify-content: flex-start; /* FIXED: Align buttons to left */
+    justify-content: flex-start;
   }
 
   .phone-mockup__img {
     max-width: 260px;
   }
 }
+
 /* --- Features Section --- */
 .features {
   padding: 100px 0;
@@ -345,7 +369,6 @@ ul {
   overflow: hidden;
 }
 
-/* Header */
 .section-header {
   text-align: center;
   max-width: 700px;
@@ -360,9 +383,9 @@ ul {
   margin-bottom: 16px;
   position: relative;
   display: inline-block;
+  text-transform: uppercase;
 }
 
-/* Decorative underline for Swiss/Tech feel */
 .section-title::after {
   content: "";
   display: block;
@@ -381,7 +404,6 @@ ul {
   line-height: 1.6;
 }
 
-/* Grid Layout */
 .features__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -390,7 +412,6 @@ ul {
   z-index: 2;
 }
 
-/* Card Component */
 .feature-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -402,17 +423,16 @@ ul {
   align-items: flex-start;
   height: 100%;
   position: relative;
-  overflow: hidden; /* For inner glow effects */
+  overflow: hidden;
 }
 
-/* Card Hover State */
 .feature-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-4px);
   box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.15);
 }
 
-/* Subtle gradient overlay on hover */
+/* Spotlight Effect Gradient */
 .feature-card::before {
   content: "";
   position: absolute;
@@ -434,7 +454,6 @@ ul {
   opacity: 1;
 }
 
-/* Icon Styling */
 .feature-card__icon {
   width: 64px;
   height: 64px;
@@ -457,13 +476,13 @@ ul {
   transform: scale(1.05);
 }
 
-/* Card Typography */
 .feature-card__title {
   font-size: 1.25rem;
   font-weight: var(--fw-bold);
   color: var(--color-text-primary);
   margin-bottom: 12px;
   letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 
 .feature-card__text {
@@ -473,20 +492,15 @@ ul {
   font-weight: var(--fw-light);
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .features {
     padding: 60px 0;
   }
-
-  .section-title::after {
-    margin: 12px auto 0;
-  }
-
   .feature-card {
     padding: 32px 24px;
   }
 }
+
 /* --- Showcase Section --- */
 .showcase {
   padding: 120px 0;
@@ -496,12 +510,11 @@ ul {
 
 .showcase__container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Split layout */
+  grid-template-columns: 1fr 1fr;
   gap: 80px;
   align-items: center;
 }
 
-/* Image Wrapper with "Tech" Border */
 .showcase__image-wrapper {
   position: relative;
   padding: 12px;
@@ -512,6 +525,7 @@ ul {
   transition: var(--transition);
 }
 
+/* Border Gradient Mask */
 .showcase__image-wrapper::after {
   content: "";
   position: absolute;
@@ -554,7 +568,6 @@ ul {
   filter: saturate(1.1) contrast(1.1);
 }
 
-/* Typography & Content */
 .showcase__content {
   display: flex;
   flex-direction: column;
@@ -568,6 +581,7 @@ ul {
   margin-bottom: 24px;
   line-height: 1.1;
   letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .showcase__text {
@@ -579,7 +593,6 @@ ul {
   font-weight: var(--fw-light);
 }
 
-/* Tech List Styling */
 .showcase__list {
   display: flex;
   flex-direction: column;
@@ -603,37 +616,21 @@ ul {
   text-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
 }
 
-/* Responsive Adjustments for Showcase Section */
 @media (max-width: 968px) {
   .showcase {
     padding: 80px 0;
   }
-
   .showcase__container {
     grid-template-columns: 1fr;
     gap: 48px;
-    text-align: left; /* FIXED: Restore rigid left alignment */
-    padding-left: 24px;
-    padding-right: 24px;
+    text-align: left;
   }
-
-  .showcase__content {
-    align-items: flex-start; /* FIXED: Align items to start */
-  }
-
   .showcase__list {
-    border-left: 1px solid var(--color-border); /* RESTORED: Keep the border */
-    padding-left: 24px; /* RESTORED: Keep padding */
-    align-items: flex-start; /* FIXED: Align list items to start */
-  }
-
-  .showcase__text {
-    margin-left: 0; /* FIXED: Remove auto margins */
-    margin-right: 0;
+    align-items: flex-start;
   }
 }
 
-/* --- Footer & Waitlist Section --- */
+/* --- Footer --- */
 .footer {
   background-color: var(--color-bg);
   border-top: 1px solid var(--color-border);
@@ -647,7 +644,6 @@ ul {
   gap: 80px;
 }
 
-/* CTA Box (The "Join" area) */
 .footer__cta-box {
   background: linear-gradient(
     180deg,
@@ -662,7 +658,6 @@ ul {
   overflow: hidden;
 }
 
-/* Subtle cyber-glow at top of card */
 .footer__cta-box::before {
   content: "";
   position: absolute;
@@ -687,6 +682,7 @@ ul {
   color: var(--color-text-primary);
   margin-bottom: 16px;
   letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .footer__subtitle {
@@ -698,7 +694,6 @@ ul {
   margin-right: auto;
 }
 
-/* Subscribe Form */
 .subscribe-form {
   display: flex;
   gap: 12px;
@@ -719,8 +714,14 @@ ul {
   outline: none;
 }
 
-.subscribe-form__input::placeholder {
-  color: #4a4a4a;
+/* Fix for Chrome Autofill Color (Crucial for dark mode) */
+.subscribe-form__input:-webkit-autofill,
+.subscribe-form__input:-webkit-autofill:hover,
+.subscribe-form__input:-webkit-autofill:focus,
+.subscribe-form__input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0a0a0a inset !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  caret-color: var(--color-text-primary);
 }
 
 .subscribe-form__input:focus {
@@ -730,11 +731,16 @@ ul {
 }
 
 .subscribe-form__btn {
-  /* Inherits .btn--primary properties, adding specific spacing if needed */
   flex-shrink: 0;
 }
 
-/* Visually Hidden Label (Accessibilty) */
+.disclaimer-text {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -747,7 +753,6 @@ ul {
   border: 0;
 }
 
-/* --- Footer Bottom (Links & Copy) --- */
 .footer__bottom {
   display: flex;
   justify-content: space-between;
@@ -781,40 +786,34 @@ ul {
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
 }
 
-/* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
   .subscribe-form {
     flex-direction: column;
     width: 100%;
   }
-
   .subscribe-form__btn {
     width: 100%;
   }
-
   .footer__bottom {
     flex-direction: column-reverse;
     gap: 24px;
     text-align: center;
   }
-
   .footer__cta-box {
     padding: 48px 20px;
   }
 }
-/* --- Mobile Navigation & Hamburger --- */
 
-/* Default: Hide Hamburger on Desktop */
+/* --- Mobile Navigation --- */
 .mobile-toggle {
   display: none;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 8px;
-  z-index: 1100; /* Above the nav drawer */
+  z-index: 1100;
 }
 
-/* Hamburger Lines */
 .hamburger-line {
   display: block;
   width: 24px;
@@ -825,58 +824,49 @@ ul {
   border-radius: 2px;
 }
 
-/* Mobile Breakpoint */
 @media (max-width: 768px) {
   .mobile-toggle {
     display: block;
   }
 
-  /* Animate Hamburger to X */
   .mobile-toggle.is-active .hamburger-line:nth-child(1) {
     transform: rotate(45deg) translate(5px, 5px);
     background-color: var(--color-primary);
   }
-
   .mobile-toggle.is-active .hamburger-line:nth-child(2) {
     opacity: 0;
   }
-
   .mobile-toggle.is-active .hamburger-line:nth-child(3) {
     transform: rotate(-45deg) translate(5px, -5px);
     background-color: var(--color-primary);
   }
 
-  /* Fullscreen Drawer Styling */
   .header__nav {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    /* CHANGED: 100vh -> 100dvh to account for dynamic mobile browser bars */
+    /* Use 100dvh for better mobile browser support */
     height: 100dvh;
     background-color: rgba(5, 5, 5, 0.95);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     z-index: 1050;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* Animation State: Hidden */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-20px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Cyberpunk easing */
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Animation State: Open */
   .header__nav.is-open {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
   }
 
-  /* Mobile List Layout */
   .nav-list {
     flex-direction: column;
     align-items: center;
@@ -884,15 +874,12 @@ ul {
     width: 100%;
   }
 
-  /* Mobile Links Typography */
   .nav-list__link {
     font-size: 1.5rem;
     font-weight: var(--fw-bold);
-    letter-spacing: 0.05em;
     color: var(--color-text-primary);
   }
 
-  /* Button in Mobile Menu */
   .nav-list__item .btn {
     width: 100%;
     min-width: 200px;
