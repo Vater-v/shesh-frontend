@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#050505" />
     <meta
       name="description"
-      content="SHESH — Инициализация нового партнера. Выберите ваш вариант."
+      content="SHESH — Регистрация нового пользователя. Выберите подходящий тип аккаунта для работы с платформой."
     />
-    <title>SHESH // Инициализация</title>
+    <title>SHESH — Регистрация в системе</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +24,11 @@
     <div class="auth-layout">
       <header class="auth-layout__header">
         <div class="container">
-          <a href="/" class="brand-link" aria-label="Вернуться на главную">
+          <a
+            href="/"
+            class="brand-link"
+            aria-label="Вернуться на главную страницу"
+          >
             <span class="brand-link__text"
               >SHESH<span class="text-accent">.</span></span
             >
@@ -62,22 +66,22 @@
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </span>
-              <span class="cmd-link__text">ABORT / BACK</span>
+              <span class="cmd-link__text">Вернуться назад</span>
             </a>
           </nav>
 
           <header class="terminal__header">
-            <h1 id="term-title" class="terminal__title">Новый Партнер</h1>
+            <h1 id="term-title" class="terminal__title">Создание аккаунта</h1>
 
             <div class="security-badge" role="status">
               <div class="security-badge__row">
-                <span class="security-badge__label">SYS.STATUS:</span>
-                <span class="security-badge__value">ONLINE</span>
+                <span class="security-badge__label">Статус:</span>
+                <span class="security-badge__value">Система активна</span>
               </div>
               <div class="security-badge__row">
-                <span class="security-badge__label">AUTH.LEVEL:</span>
+                <span class="security-badge__label">Доступ:</span>
                 <span class="security-badge__value text-accent"
-                  >UNVERIFIED_0x</span
+                  >Новый пользователь</span
                 >
               </div>
               <div class="security-badge__line" aria-hidden="true"></div>
@@ -87,7 +91,7 @@
           <div
             class="protocol-switcher"
             role="tablist"
-            aria-label="Протоколы регистрации"
+            aria-label="Тип аккаунта"
           >
             <button
               type="button"
@@ -100,7 +104,7 @@
               data-protocol="operational"
             >
               <span class="protocol-switcher__code">01</span>
-              <span class="protocol-switcher__text">Operational</span>
+              <span class="protocol-switcher__text">Стандартный</span>
               <div
                 class="protocol-switcher__indicator"
                 aria-hidden="true"
@@ -118,7 +122,7 @@
               data-protocol="ghost"
             >
               <span class="protocol-switcher__code">02</span>
-              <span class="protocol-switcher__text">Ghost</span>
+              <span class="protocol-switcher__text">Анонимный</span>
               <div
                 class="protocol-switcher__indicator"
                 aria-hidden="true"
@@ -151,7 +155,7 @@
 
             <div class="form-group">
               <label for="login" class="form-group__label">
-                Идентификатор <span class="form-group__req">*</span>
+                Имя пользователя <span class="form-group__req">*</span>
               </label>
               <div class="form-group__control">
                 <input
@@ -159,7 +163,7 @@
                   id="login"
                   name="login"
                   class="form-group__input"
-                  placeholder="user_id"
+                  placeholder="Придумайте логин"
                   required
                   minlength="3"
                   autocomplete="username"
@@ -195,7 +199,7 @@
             >
               <div class="form-group">
                 <label for="email" class="form-group__label">
-                  Канал связи (Email) <span class="form-group__req">*</span>
+                  Электронная почта <span class="form-group__req">*</span>
                 </label>
                 <div class="form-group__control">
                   <input
@@ -203,7 +207,7 @@
                     id="email"
                     name="email"
                     class="form-group__input"
-                    placeholder="root@domain.sys"
+                    placeholder="example@mail.ru"
                     required
                     autocomplete="email"
                     aria-describedby="email-error"
@@ -258,15 +262,16 @@
                   </svg>
                 </div>
                 <div class="system-message__content">
-                  <strong>GHOST PROTOCOL:</strong> Email не используется.
-                  <br />Восстановление доступа невозможно. Сохраните ваш пароль.
+                  <strong>КОНФИДЕНЦИАЛЬНЫЙ РЕЖИМ:</strong> Email не
+                  привязывается к аккаунту. <br />Восстановление доступа в
+                  случае утери пароля невозможно.
                 </div>
               </div>
             </div>
 
             <div class="form-group">
               <label for="password" class="form-group__label">
-                Ваш пароль <span class="form-group__req">*</span>
+                Пароль <span class="form-group__req">*</span>
               </label>
               <div class="form-group__control">
                 <input
@@ -303,7 +308,7 @@
                 <button
                   type="button"
                   class="form-group__toggle-btn"
-                  aria-label="Показать пароль"
+                  aria-label="Показать или скрыть пароль"
                   data-action="toggle-password"
                   aria-pressed="false"
                 >
@@ -328,8 +333,8 @@
 
               <div class="form-group__footer">
                 <ul id="password-rules" class="form-group__rules">
-                  <li>Минимум 8 символов</li>
-                  <li>Высокая энтропия</li>
+                  <li>Не менее 8 символов</li>
+                  <li>Рекомендуется использовать буквы и цифры</li>
                 </ul>
               </div>
             </div>
@@ -339,7 +344,7 @@
                 type="submit"
                 class="btn btn--primary btn--block btn--glitch"
               >
-                <span class="btn__content">Инициализация</span>
+                <span class="btn__content">Зарегистрироваться</span>
                 <span class="btn__deco" aria-hidden="true">_</span>
               </button>
             </div>
@@ -347,8 +352,10 @@
 
           <footer class="terminal__footer">
             <p class="auth-meta">
-              Уже есть идентификатор?
-              <a href="/login.html" class="link-glitch">Вход в терминал &gt;</a>
+              Уже зарегистрированы?
+              <a href="/login.html" class="link-glitch"
+                >Войти в личный кабинет &gt;</a
+              >
             </p>
           </footer>
         </section>
