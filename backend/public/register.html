@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регистрация — SHESH</title>
+    <style>
+      :root {
+        --color-bg: #f5f7fa;
+        --color-card: #ffffff;
+        --color-text: #1a1d21;
+        --color-text-muted: #64748b;
+        --color-primary: #2563eb;
+        --color-primary-hover: #1d4ed8;
+        --color-border: #e2e8f0;
+        --radius: 8px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+
+      .register-container {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+      }
+
+      .brand {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .brand-name {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--color-text);
+        text-transform: uppercase;
+      }
+
+      .brand-dot {
+        color: var(--color-primary);
+      }
+
+      .card {
+        background: var(--color-card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 32px;
+        border: 1px solid var(--color-border);
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: var(--color-text-muted);
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      /* Переключатель режимов */
+      .mode-toggle {
+        display: flex;
+        background: var(--color-bg);
+        padding: 4px;
+        border-radius: var(--radius);
+        margin-bottom: 24px;
+      }
+
+      .mode-btn {
+        flex: 1;
+        border: none;
+        padding: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: calc(var(--radius) - 2px);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--color-text-muted);
+        background: transparent;
+      }
+
+      .mode-btn.active {
+        background: var(--color-card);
+        color: var(--color-text);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Форма */
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--color-text);
+      }
+
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      input:focus {
+        border-color: var(--color-primary);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 8px;
+      }
+
+      .btn-submit:hover {
+        background-color: var(--color-primary-hover);
+      }
+
+      .footer-links {
+        margin-top: 24px;
+        text-align: center;
+        font-size: 13px;
+      }
+
+      .footer-links a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="register-container">
+      <div class="brand">
+        <span class="brand-name">Shesh<span class="brand-dot">.</span></span>
+      </div>
+
+      <div class="card">
+        <h1>Создать аккаунт</h1>
+        <p class="subtitle">Выберите предпочтительный протокол доступа</p>
+
+        <div class="mode-toggle">
+          <button
+            type="button"
+            class="mode-btn active"
+            id="btn-classic"
+            onclick="setMode('classic')"
+          >
+            Классический
+          </button>
+          <button
+            type="button"
+            class="mode-btn"
+            id="btn-anon"
+            onclick="setMode('anon')"
+          >
+            Анонимный
+          </button>
+        </div>
+
+        <form id="register-form" action="/register" method="POST">
+          <div class="form-group" id="group-email">
+            <label for="email">Электронная почта</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="name@company.com"
+              required
+            />
+          </div>
+
+          <div class="form-group hidden" id="group-username">
+            <label for="username">Имя пользователя</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="cyber_pilot_99"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Пароль</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              minlength="8"
+            />
+          </div>
+
+          <button type="submit" class="btn-submit">Зарегистрироваться</button>
+        </form>
+
+        <div class="footer-links">
+          <span style="color: var(--color-text-muted)">Уже есть аккаунт?</span>
+          <a href="/login.html">Войти</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function setMode(mode) {
+        const btnClassic = document.getElementById("btn-classic");
+        const btnAnon = document.getElementById("btn-anon");
+        const groupEmail = document.getElementById("group-email");
+        const groupUsername = document.getElementById("group-username");
+
+        const emailInput = document.getElementById("email");
+        const usernameInput = document.getElementById("username");
+
+        if (mode === "classic") {
+          // UI переключение
+          btnClassic.classList.add("active");
+          btnAnon.classList.remove("active");
+
+          // Показ/скрытие полей
+          groupEmail.classList.remove("hidden");
+          groupUsername.classList.add("hidden");
+
+          // Валидация
+          emailInput.required = true;
+          usernameInput.required = false;
+          usernameInput.value = ""; // Очистка при смене
+        } else {
+          // UI переключение
+          btnClassic.classList.remove("active");
+          btnAnon.classList.add("active");
+
+          // Показ/скрытие полей
+          groupEmail.classList.add("hidden");
+          groupUsername.classList.remove("hidden");
+
+          // Валидация
+          emailInput.required = false;
+          emailInput.value = ""; // Очистка при смене
+          usernameInput.required = true;
+        }
+      }
+    </script>
+  </body>
+</html>
