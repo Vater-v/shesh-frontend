@@ -120,33 +120,5 @@
         </button>
       </form>
     </main>
-
-    <script>
-      // Минимальный JS для логики формы (можно вынести в main.js)
-      const form = document.getElementById("reg-form");
-      const emailGroup = document.getElementById("email-group");
-      const emailInput = document.getElementById("email");
-      const ghostMsg = document.getElementById("ghost-msg");
-      const tabs = document.querySelectorAll(".protocol-switcher__btn");
-
-      tabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          const isGhost = tab.dataset.protocol === "ghost";
-
-          // Визуал табов
-          tabs.forEach((t) =>
-            t.classList.remove("protocol-switcher__btn--active")
-          );
-          tab.classList.add("protocol-switcher__btn--active");
-
-          // Логика полей: бэкенд требует либо email, либо login
-          emailGroup.style.display = isGhost ? "none" : "block";
-          emailInput.required = !isGhost;
-          ghostMsg.style.display = isGhost ? "flex" : "none";
-
-          if (isGhost) emailInput.value = ""; // Очищаем, чтобы не ушло на бэк
-        });
-      });
-    </script>
   </body>
 </html>
