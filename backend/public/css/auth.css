@@ -42,13 +42,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* Защита от вылета свечений вбок */
+  overflow-y: auto; /* Позволяет скроллить, если форма не влезает (на очень маленьких экранах) */
 }
 
 /* --- Ambient Background --- */
 .ambient-glow {
-  position: absolute;
+  position: fixed; /* Вместо absolute */
   width: 800px;
   height: 800px;
   border-radius: 50%;
@@ -424,4 +424,21 @@ body {
 }
 .link-accent:hover {
   color: var(--accent-violet);
+}
+/* Shake Animation (для ошибок) */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
 }
