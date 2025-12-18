@@ -1058,3 +1058,7 @@ ul {
     justify-content: center;
   }
 }
+/* Класс для скрытия элементов */
+.hidden {
+  display: none !important;
+}
