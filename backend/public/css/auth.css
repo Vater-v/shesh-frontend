@@ -1,0 +1,427 @@
+:root {
+  /* --- Palette: Deep Void --- */
+  --bg-void: #050505;
+  --bg-surface: #121212;
+  --bg-surface-hover: #1a1a1a;
+
+  --border: #2a2a2a;
+  --border-light: #333333;
+
+  --accent-cyan: #00e5ff;
+  --accent-violet: #d500f9;
+  --accent-error: #ff3366;
+  --accent-success: #00c853;
+
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-tertiary: #444444;
+
+  /* --- Metrics --- */
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-md: 16px;
+  --radius-sm: 8px;
+
+  /* --- Animation --- */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --transition: 0.3s var(--ease-out-expo);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Ambient Background --- */
+.ambient-glow {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.08;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.glow-cyan {
+  background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+  top: -400px;
+  left: -200px;
+}
+
+.glow-violet {
+  background: radial-gradient(circle, var(--accent-violet) 0%, transparent 70%);
+  bottom: -400px;
+  right: -200px;
+}
+
+/* --- Auth Card --- */
+.auth-container {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 40px;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7);
+  /* Fallback border */
+  border: 1px solid var(--border);
+}
+
+/* Spotlight Border Logic */
+.spotlight-border {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px; /* This defines your border width */
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.4),
+    transparent 40%
+  );
+
+  /* Webkit/Blink (Safari, Chrome, Edge) */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+
+  /* Standard Property (Firefox and future-proofing) */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 2;
+}
+
+.brand-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.05em;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.dot {
+  color: var(--accent-cyan);
+}
+
+.auth-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* --- Toggle Switch --- */
+.toggle-container {
+  position: relative;
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 24px;
+  z-index: 2;
+}
+
+.toggle-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+  font-family: inherit;
+}
+
+.toggle-btn.active {
+  color: var(--text-primary);
+}
+
+/* Sliding Pill Background */
+.toggle-track {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  transition: transform 0.3s var(--ease-out-expo);
+  z-index: 1;
+}
+
+/* Slide logic handled by JS class or attribute */
+.toggle-container[data-mode="anon"] .toggle-track {
+  transform: translateX(100%);
+}
+
+/* --- Form Elements --- */
+.auth-form {
+  position: relative;
+  z-index: 2;
+}
+
+.input-group {
+  margin-bottom: 24px;
+  transition: all 0.3s var(--ease-out-expo);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.input-group.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-field {
+  width: 100%;
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-family);
+}
+
+/* Chrome Autofill Dark Mode Fix */
+.input-field:-webkit-autofill,
+.input-field:-webkit-autofill:hover,
+.input-field:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #0a0a0a inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary);
+}
+
+.input-field:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.2);
+  background: var(--bg-surface-hover);
+}
+
+.input-field.invalid {
+  border-color: var(--accent-error);
+}
+.input-field.valid {
+  border-color: var(--accent-success);
+}
+
+.input-helper {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+}
+
+/* Password Toggle */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: var(--text-primary);
+}
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Strength Meter */
+.password-strength {
+  height: 2px;
+  background: var(--border);
+  margin-top: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.strength-bar {
+  height: 100%;
+  width: 0;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* --- Submit Button --- */
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--text-primary);
+  color: var(--bg-void);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.btn-submit:hover {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  background: var(--text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loader */
+.btn-loader {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+.btn-submit.loading .btn-text {
+  display: none;
+}
+.btn-submit.loading .btn-loader {
+  display: block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Feedback --- */
+.form-message {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  text-align: center;
+  margin-top: 16px;
+  animation: slideDown 0.3s var(--ease-out-expo);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-message.error {
+  background: rgba(255, 51, 102, 0.1);
+  color: #ff80ab;
+  border: 1px solid rgba(255, 51, 102, 0.2);
+}
+
+.form-message.success {
+  background: rgba(0, 200, 83, 0.1);
+  color: var(--accent-success);
+  border: 1px solid rgba(0, 200, 83, 0.2);
+}
+
+/* --- Footer --- */
+.auth-footer {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
+}
+
+.link-accent {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.link-accent:hover {
+  color: var(--accent-violet);
+}

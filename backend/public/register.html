@@ -3,289 +3,170 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Регистрация — SHESH</title>
-    <style>
-      :root {
-        --color-bg: #f5f7fa;
-        --color-card: #ffffff;
-        --color-text: #1a1d21;
-        --color-text-muted: #64748b;
-        --color-primary: #2563eb;
-        --color-primary-hover: #1d4ed8;
-        --color-border: #e2e8f0;
-        --radius: 8px;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
+    <title>Регистрация — SHESH SYSTEM</title>
+    <meta
+      name="description"
+      content="Регистрация в системе SHESH. Выберите протокол доступа: Классический или Анонимный."
+    />
+    <meta name="theme-color" content="#050505" />
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
-        background-color: var(--color-bg);
-        color: var(--color-text);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        line-height: 1.5;
-      }
-
-      .register-container {
-        width: 100%;
-        max-width: 400px;
-        padding: 20px;
-      }
-
-      .brand {
-        text-align: center;
-        margin-bottom: 32px;
-      }
-
-      .brand-name {
-        font-size: 24px;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        color: var(--color-text);
-        text-transform: uppercase;
-      }
-
-      .brand-dot {
-        color: var(--color-primary);
-      }
-
-      .card {
-        background: var(--color-card);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 32px;
-        border: 1px solid var(--color-border);
-      }
-
-      h1 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        text-align: center;
-      }
-
-      .subtitle {
-        font-size: 14px;
-        color: var(--color-text-muted);
-        text-align: center;
-        margin-bottom: 24px;
-      }
-
-      /* Переключатель режимов */
-      .mode-toggle {
-        display: flex;
-        background: var(--color-bg);
-        padding: 4px;
-        border-radius: var(--radius);
-        margin-bottom: 24px;
-      }
-
-      .mode-btn {
-        flex: 1;
-        border: none;
-        padding: 8px;
-        font-size: 13px;
-        font-weight: 500;
-        border-radius: calc(var(--radius) - 2px);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--color-text-muted);
-        background: transparent;
-      }
-
-      .mode-btn.active {
-        background: var(--color-card);
-        color: var(--color-text);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Форма */
-      .form-group {
-        margin-bottom: 16px;
-      }
-
-      label {
-        display: block;
-        font-size: 13px;
-        font-weight: 500;
-        margin-bottom: 6px;
-        color: var(--color-text);
-      }
-
-      input {
-        width: 100%;
-        padding: 10px 12px;
-        font-size: 14px;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius);
-        outline: none;
-        transition: border-color 0.2s ease;
-      }
-
-      input:focus {
-        border-color: var(--color-primary);
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: var(--radius);
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-        margin-top: 8px;
-      }
-
-      .btn-submit:hover {
-        background-color: var(--color-primary-hover);
-      }
-
-      .footer-links {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 13px;
-      }
-
-      .footer-links a {
-        color: var(--color-primary);
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      .footer-links a:hover {
-        text-decoration: underline;
-      }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/auth.css" />
   </head>
   <body>
-    <div class="register-container">
-      <div class="brand">
-        <span class="brand-name">Shesh<span class="brand-dot">.</span></span>
-      </div>
+    <div class="ambient-glow glow-cyan"></div>
+    <div class="ambient-glow glow-violet"></div>
 
-      <div class="card">
-        <h1>Создать аккаунт</h1>
-        <p class="subtitle">Выберите предпочтительный протокол доступа</p>
+    <main class="auth-container">
+      <div class="auth-card" id="authCard">
+        <div class="spotlight-border"></div>
 
-        <div class="mode-toggle">
+        <div class="auth-header">
+          <a href="/" class="brand-logo" aria-label="На главную">
+            SHESH<span class="dot">.</span>
+          </a>
+          <h1 class="auth-title">Новый доступ</h1>
+          <p class="auth-subtitle">Выберите протокол идентификации</p>
+        </div>
+
+        <div
+          class="toggle-container"
+          role="tablist"
+          aria-label="Режим регистрации"
+          data-mode="classic"
+        >
+          <div class="toggle-track"></div>
           <button
             type="button"
-            class="mode-btn active"
-            id="btn-classic"
-            onclick="setMode('classic')"
+            role="tab"
+            aria-selected="true"
+            id="tab-classic"
+            class="toggle-btn active"
           >
             Классический
           </button>
           <button
             type="button"
-            class="mode-btn"
-            id="btn-anon"
-            onclick="setMode('anon')"
+            role="tab"
+            aria-selected="false"
+            id="tab-anon"
+            class="toggle-btn"
           >
             Анонимный
           </button>
         </div>
 
-        <form id="register-form" action="/register" method="POST">
-          <div class="form-group" id="group-email">
-            <label for="email">Электронная почта</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="name@company.com"
-              required
-            />
-          </div>
+        <form id="registerForm" class="auth-form" novalidate>
+          <div class="form-content">
+            <div class="input-group" id="group-email">
+              <label for="email" class="input-label">ПОЧТА</label>
+              <div class="input-wrapper">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="input-field"
+                  placeholder="name@mail.com"
+                  autocomplete="email"
+                />
+              </div>
+              <span class="input-helper">Требуется подтверждение email</span>
+            </div>
 
-          <div class="form-group hidden" id="group-username">
-            <label for="username">Имя пользователя</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="cyber_pilot_99"
-            />
-          </div>
+            <div class="input-group hidden" id="group-username">
+              <label for="username" class="input-label">ЛОГИН</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  class="input-field"
+                  placeholder="cyber_pilot_99"
+                  autocomplete="username"
+                />
+              </div>
+              <span class="input-helper">Только латиница, цифры и «_»</span>
+            </div>
 
-          <div class="form-group">
-            <label for="password">Пароль</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              required
-              minlength="8"
-            />
-          </div>
+            <div class="input-group">
+              <label for="password" class="input-label">ПАРОЛЬ</label>
+              <div class="input-wrapper">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="input-field"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  required
+                  minlength="8"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  id="togglePassword"
+                  aria-label="Показать пароль"
+                >
+                  <svg
+                    class="eye-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                    ></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg
+                    class="eye-off-icon hidden"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
 
-          <button type="submit" class="btn-submit">Зарегистрироваться</button>
+              <div class="password-strength">
+                <div class="strength-bar"></div>
+              </div>
+            </div>
+
+            <div
+              id="form-feedback"
+              class="form-message hidden"
+              role="alert"
+            ></div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <span class="btn-text">ЗАРЕГИСТРИРОВАТЬ</span>
+              <span class="btn-loader"></span>
+            </button>
+          </div>
         </form>
 
-        <div class="footer-links">
-          <span style="color: var(--color-text-muted)">Уже есть аккаунт?</span>
-          <a href="/login.html">Войти</a>
+        <div class="auth-footer">
+          <p>Уже с нами? <a href="/login.html" class="link-accent">Войти</a></p>
         </div>
       </div>
-    </div>
+    </main>
 
-    <script>
-      function setMode(mode) {
-        const btnClassic = document.getElementById("btn-classic");
-        const btnAnon = document.getElementById("btn-anon");
-        const groupEmail = document.getElementById("group-email");
-        const groupUsername = document.getElementById("group-username");
-
-        const emailInput = document.getElementById("email");
-        const usernameInput = document.getElementById("username");
-
-        if (mode === "classic") {
-          // UI переключение
-          btnClassic.classList.add("active");
-          btnAnon.classList.remove("active");
-
-          // Показ/скрытие полей
-          groupEmail.classList.remove("hidden");
-          groupUsername.classList.add("hidden");
-
-          // Валидация
-          emailInput.required = true;
-          usernameInput.required = false;
-          usernameInput.value = ""; // Очистка при смене
-        } else {
-          // UI переключение
-          btnClassic.classList.remove("active");
-          btnAnon.classList.add("active");
-
-          // Показ/скрытие полей
-          groupEmail.classList.add("hidden");
-          groupUsername.classList.remove("hidden");
-
-          // Валидация
-          emailInput.required = false;
-          emailInput.value = ""; // Очистка при смене
-          usernameInput.required = true;
-        }
-      }
-    </script>
+    <script src="js/auth.js"></script>
   </body>
 </html>
