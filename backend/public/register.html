@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050505" />
+    <meta
+      name="description"
+      content="SHESH — Регистрация Оператора. Выберите протокол доступа: Operational (Standard) или Ghost (Anonymous)."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SHESH — Инициализация Системы" />
+    <meta
+      property="og:description"
+      content="Терминал доступа. Введите учетные данные для синхронизации."
+    />
+
+    <title>SHESH — Инициализация Оператора</title>
+
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header__container">
+        <a href="/" class="header__logo" aria-label="SHESH Главная">
+          <span class="logo__text"
+            >SHESH<span style="color: var(--color-primary)">.</span></span
+          >
+        </a>
+
+        <button
+          class="mobile-toggle"
+          aria-controls="primary-navigation"
+          aria-expanded="false"
+          aria-label="Открыть терминал меню"
+        >
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+        <nav
+          class="header__nav"
+          id="primary-navigation"
+          aria-label="Основная навигация"
+        >
+          <ul class="nav-list">
+            <li class="nav-list__item">
+              <a href="/index.html#features" class="nav-list__link"
+                >Протоколы</a
+              >
+            </li>
+            <li class="nav-list__item">
+              <a href="/index.html#showcase" class="nav-list__link">Метрики</a>
+            </li>
+
+            <li class="nav-list__item nav-separator" aria-hidden="true"></li>
+
+            <li class="nav-list__item">
+              <a href="/login.html" class="nav-list__link">Вход</a>
+            </li>
+
+            <li class="nav-list__item">
+              <a
+                href="/register.html"
+                class="btn btn--small btn--primary"
+                aria-current="page"
+              >
+                Регистрация
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="auth-section">
+        <div class="container auth-section__container">
+          <div class="auth-navigation">
+            <a href="/" class="btn btn--text auth-navigation__link">
+              <span aria-hidden="true">&lt;</span> Вернуться в терминал
+            </a>
+          </div>
+
+          <div class="auth-terminal">
+            <header class="auth-terminal__header">
+              <div class="auth-terminal__meta">
+                <h1 class="auth-terminal__title">Новый Оператор</h1>
+                <p class="auth-terminal__subtitle">
+                  Выберите протокол интеграции
+                </p>
+              </div>
+
+              <div class="security-badge" aria-label="Уровень безопасности">
+                <div class="security-badge__icon">🔒</div>
+                <div class="security-badge__content">
+                  <span class="security-badge__label">SECURITY CLEARANCE</span>
+                  <span class="security-badge__value text-accent"
+                    >UNVERIFIED</span
+                  >
+                </div>
+              </div>
+            </header>
+
+            <div
+              class="protocol-switcher"
+              role="tablist"
+              aria-label="Режим регистрации"
+            >
+              <button
+                type="button"
+                class="protocol-switcher__btn protocol-switcher__btn--active"
+                id="tab-protocol-a"
+                role="tab"
+                aria-selected="true"
+                aria-controls="protocol-a"
+              >
+                <span class="protocol-switcher__code">01</span>
+                <span class="protocol-switcher__text">Operational</span>
+              </button>
+
+              <button
+                type="button"
+                class="protocol-switcher__btn"
+                id="tab-protocol-b"
+                role="tab"
+                aria-selected="false"
+                aria-controls="protocol-b"
+              >
+                <span class="protocol-switcher__code">02</span>
+                <span class="protocol-switcher__text">Ghost Protocol</span>
+              </button>
+            </div>
+
+            <div class="auth-terminal__body">
+              <form
+                class="auth-form"
+                id="protocol-a"
+                action="/api/register/standard"
+                method="POST"
+                role="tabpanel"
+                aria-labelledby="tab-protocol-a"
+              >
+                <div class="auth-form__group">
+                  <label for="reg-username" class="auth-form__label"
+                    >Идентификатор (Login)</label
+                  >
+                  <div class="auth-form__input-wrapper">
+                    <input
+                      type="text"
+                      id="reg-username"
+                      name="username"
+                      class="auth-form__input"
+                      placeholder="user_id"
+                      required
+                      autocomplete="username"
+                    />
+                  </div>
+                </div>
+
+                <div class="auth-form__group">
+                  <label for="reg-email" class="auth-form__label"
+                    >Канал связи (Email)</label
+                  >
+                  <div class="auth-form__input-wrapper">
+                    <input
+                      type="email"
+                      id="reg-email"
+                      name="email"
+                      class="auth-form__input"
+                      placeholder="root@domain.sys"
+                      required
+                      autocomplete="email"
+                    />
+                  </div>
+                </div>
+
+                <div class="auth-form__group">
+                  <label for="reg-password" class="auth-form__label"
+                    >Ключ доступа</label
+                  >
+                  <div class="auth-form__input-wrapper">
+                    <input
+                      type="password"
+                      id="reg-password"
+                      name="password"
+                      class="auth-form__input auth-form__input--password"
+                      placeholder="••••••••••••"
+                      required
+                      minlength="12"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="auth-form__toggle-vis"
+                      aria-label="Показать пароль"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                </div>
+
+                <div class="auth-form__actions">
+                  <button
+                    type="submit"
+                    class="btn btn--primary auth-form__submit"
+                  >
+                    Инициализация
+                  </button>
+                </div>
+              </form>
+
+              <form
+                class="auth-form"
+                id="protocol-b"
+                action="/api/register/ghost"
+                method="POST"
+                hidden
+                role="tabpanel"
+                aria-labelledby="tab-protocol-b"
+              >
+                <div class="system-message system-message--warning">
+                  <span class="system-message__icon" aria-hidden="true"
+                    >⚠️</span
+                  >
+                  <div class="system-message__content">
+                    <strong class="system-message__title"
+                      >Режим Анонимности</strong
+                    >
+                    <p class="system-message__text">
+                      Email не используется. Восстановление доступа невозможно.
+                      Ключ генерируется локально.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="auth-form__group">
+                  <label for="ghost-alias" class="auth-form__label"
+                    >Псевдоним (Alias)</label
+                  >
+                  <input
+                    type="text"
+                    id="ghost-alias"
+                    name="alias"
+                    class="auth-form__input auth-form__input--mono"
+                    placeholder="GHOST_UNIT_X"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="auth-form__group">
+                  <label for="ghost-local-key" class="auth-form__label"
+                    >Локальный Мастер-Ключ</label
+                  >
+                  <div class="auth-form__input-wrapper">
+                    <input
+                      type="text"
+                      id="ghost-local-key"
+                      name="local_key"
+                      class="auth-form__input auth-form__input--code"
+                      value="[WAITING_ENTROPY...]"
+                      readonly
+                    />
+                    <button
+                      type="button"
+                      class="btn btn--small btn--outline"
+                      aria-label="Сгенерировать"
+                    >
+                      RE-GEN
+                    </button>
+                  </div>
+                  <span class="auth-form__hint"
+                    >Сохраните этот ключ в защищенном хранилище.</span
+                  >
+                </div>
+
+                <div class="auth-form__group">
+                  <label for="ghost-password" class="auth-form__label"
+                    >Пароль Сессии</label
+                  >
+                  <div class="auth-form__input-wrapper">
+                    <input
+                      type="password"
+                      id="ghost-password"
+                      name="password"
+                      class="auth-form__input"
+                      required
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="auth-form__toggle-vis"
+                      aria-label="Показать пароль"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                </div>
+
+                <div class="auth-form__actions">
+                  <button
+                    type="submit"
+                    class="btn btn--outline btn--secondary auth-form__submit"
+                  >
+                    Активировать Ghost-Протокол
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <footer class="auth-terminal__footer">
+              <p class="auth-terminal__meta">
+                Уже есть идентификатор?
+                <a href="/login.html" class="auth-terminal__link"
+                  >Вход в терминал</a
+                >
+              </p>
+            </footer>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__container">
+        <div class="footer__bottom" style="border-top: none; padding-top: 0">
+          <p class="copyright">&copy; 2025 SHESH. System Stable.</p>
+          <nav class="footer__nav" aria-label="Ссылки подвала">
+            <ul class="footer__links-list">
+              <li><a href="#" class="footer__link">Статус серверов</a></li>
+              <li><a href="#" class="footer__link">Манифест</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>

@@ -34,6 +34,16 @@ app.include_router(auth_router)
 app.mount("/css", StaticFiles(directory=PUBLIC_DIR / "css"), name="css")
 app.mount("/js", StaticFiles(directory=PUBLIC_DIR / "js"), name="js")
 
+@app.get("/register")
+@app.get("/register.html")
+async def read_register():
+    return FileResponse(PUBLIC_DIR / "register.html")
+
+@app.get("/login")
+@app.get("/login.html")
+async def read_login():
+    return FileResponse(PUBLIC_DIR / "login.html")
+
 # --- Главный роут ---
 @app.get("/")
 async def read_index():

@@ -3,109 +3,139 @@ document.addEventListener("DOMContentLoaded", () => {
   const navMenu = document.querySelector(".header__nav");
   const body = document.body;
 
-  /* --- Mobile Navigation Logic --- */
+  /* --- 1. Мобильная навигация --- */
   if (navToggle && navMenu) {
-    // Toggle Menu
+    const toggleMenu = (shouldOpen) => {
+      navToggle.setAttribute("aria-expanded", shouldOpen);
+      if (shouldOpen) {
+        navMenu.classList.add("is-open");
+        navToggle.classList.add("is-active");
+        body.style.overflow = "hidden";
+      } else {
+        navMenu.classList.remove("is-open");
+        navToggle.classList.remove("is-active");
+        body.style.overflow = "auto";
+      }
+    };
+
     navToggle.addEventListener("click", (e) => {
       e.stopPropagation();
       const isOpened = navToggle.getAttribute("aria-expanded") === "true";
       toggleMenu(!isOpened);
     });
 
-    // Close when clicking a link
     navMenu.querySelectorAll("a").forEach((link) => {
       link.addEventListener("click", () => toggleMenu(false));
     });
 
-    // Close when clicking outside
     document.addEventListener("click", (e) => {
-      const isOpened = navToggle.getAttribute("aria-expanded") === "true";
       if (
-        isOpened &&
+        navToggle.getAttribute("aria-expanded") === "true" &&
         !navMenu.contains(e.target) &&
         !navToggle.contains(e.target)
       ) {
         toggleMenu(false);
       }
     });
+  }
 
-    // Close on Escape key
-    document.addEventListener("keydown", (e) => {
-      if (
-        e.key === "Escape" &&
-        navToggle.getAttribute("aria-expanded") === "true"
-      ) {
-        toggleMenu(false);
-      }
+  /* --- 2. Эффект Spotlight для карточек --- */
+  const cards = document.querySelectorAll(".feature-card, .auth-terminal");
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (e) => {
+      requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+      });
     });
-  }
+  });
 
-  function toggleMenu(shouldOpen) {
-    if (!navToggle || !navMenu) return;
-
-    navToggle.setAttribute("aria-expanded", shouldOpen);
-
-    if (shouldOpen) {
-      navMenu.classList.add("is-open");
-      navToggle.classList.add("is-active");
-      body.style.overflow = "hidden"; // Lock scroll
-    } else {
-      navMenu.classList.remove("is-open");
-      navToggle.classList.remove("is-active");
-      body.style.overflow = "auto"; // Unlock scroll
-    }
-  }
-
-  /* --- Optimized Feature Card Spotlight --- */
-  const cards = document.querySelectorAll(".feature-card");
-
-  if (cards.length > 0) {
-    cards.forEach((card) => {
-      card.addEventListener("mousemove", (e) => {
-        // Use requestAnimationFrame for 60fps performance
-        requestAnimationFrame(() => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          card.style.setProperty("--mouse-x", `${x}px`);
-          card.style.setProperty("--mouse-y", `${y}px`);
+  /* --- 3. Переключатель протоколов (Auth Switcher) --- */
+  const protocolTabs = document.querySelectorAll(".protocol-switcher__btn");
+  if (protocolTabs.length > 0) {
+    protocolTabs.forEach((tab) => {
+      tab.addEventListener("click", (e) => {
+        // Визуальное переключение табов
+        protocolTabs.forEach((t) => {
+          t.setAttribute("aria-selected", "false");
+          t.classList.remove("protocol-switcher__btn--active");
         });
+        tab.setAttribute("aria-selected", "true");
+        tab.classList.add("protocol-switcher__btn--active");
+
+        // Переключение видимости форм
+        const targetId = tab.getAttribute("aria-controls");
+        document
+          .querySelectorAll(".auth-form")
+          .forEach((form) => (form.hidden = true));
+        const targetForm = document.getElementById(targetId);
+        if (targetForm) targetForm.hidden = false;
+
+        // Генерация ключа для Ghost-протокола
+        if (targetId === "protocol-b") {
+          const keyInput = document.getElementById("ghost-local-key");
+          if (
+            keyInput &&
+            (keyInput.value === "" || keyInput.value.includes("WAITING"))
+          ) {
+            generateGhostKey();
+          }
+        }
       });
     });
   }
 
-  /* --- Form Submit Micro-Interaction --- */
-  const form = document.getElementById("auth-form");
-  if (form) {
+  /* --- 4. Утилиты: Генератор ключа и видимость пароля --- */
+  function generateGhostKey() {
+    const keyInput = document.getElementById("ghost-local-key");
+    if (keyInput) {
+      const entropy =
+        "0x" + Math.random().toString(16).substr(2, 12).toUpperCase();
+      keyInput.value = entropy;
+    }
+  }
+
+  document.querySelectorAll(".btn--regen").forEach((btn) => {
+    btn.addEventListener("click", generateGhostKey);
+  });
+
+  document.querySelectorAll(".auth-form__toggle-vis").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = btn.parentElement.querySelector("input");
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      btn.textContent = isPassword ? "🔒" : "👁️";
+    });
+  });
+
+  /* --- 5. Обработка отправки форм --- */
+  const authForms = document.querySelectorAll(".auth-form, #auth-form");
+  authForms.forEach((form) => {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const btn = form.querySelector("button[type='submit']");
-      const input = form.querySelector("input");
       const originalText = btn.textContent;
 
-      // Processing State
       btn.textContent = "ОБРАБОТКА...";
       btn.style.opacity = "0.7";
-      input.disabled = true;
+      btn.classList.add("btn--loading");
 
-      // Simulate Network Delay
+      // Симуляция сетевого запроса
       setTimeout(() => {
-        // Success State
         btn.textContent = "ДОСТУП РАЗРЕШЕН";
+        btn.classList.remove("btn--loading");
         btn.classList.add("btn--success");
-        input.value = "";
 
-        // Reset after delay
+        // В реальном приложении здесь будет: window.location.href = "/dashboard";
         setTimeout(() => {
           btn.classList.remove("btn--success");
           btn.textContent = originalText;
           btn.style.opacity = "1";
-          input.disabled = false;
         }, 3000);
-      }, 1200);
+      }, 1500);
     });
-  }
+  });
 
   console.log(
     "%c SHESH SYSTEM %c ONLINE ",
