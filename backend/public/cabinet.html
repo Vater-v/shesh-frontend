@@ -1,41 +1,216 @@
-<main class="auth-container">
-  <div class="auth-card">
-    <h1 class="auth-title">Ваш профиль</h1>
-    <div id="user-info">
-      <p class="auth-subtitle">Загрузка данных...</p>
-    </div>
-    <a href="/" class="btn btn--outline" style="margin-top: 20px">На главную</a>
-  </div>
-</main>
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Личный кабинет — SHESH SYSTEM</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+  </head>
+  <body>
+    <div class="ambient-glow glow-cyan"></div>
+    <div class="ambient-glow glow-violet"></div>
 
-<script>
-  async function loadProfile() {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      window.location.href = "/login.html";
-      return;
-    }
+    <main class="auth-container">
+      <div class="auth-card" id="authCard">
+        <div class="spotlight-border"></div>
 
-    try {
-      const response = await fetch("/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const user = await response.json();
-        document.getElementById("user-info").innerHTML = `
-          <p><strong>Логин:</strong> ${user.login || "Не указан"}</p>
-          <p><strong>Email:</strong> ${user.email || "Не указан"}</p>
-          <p><strong>Статус:</strong> ${
-            user.is_verified ? "Верифицирован" : "Ожидает подтверждения"
-          }</p>
-        `;
-      } else {
-        throw new Error("Сессия истекла");
+        <div class="auth-header">
+          <a href="/" class="brand-logo">SHESH<span class="dot">.</span></a>
+          <h1 class="auth-title">Личный кабинет</h1>
+          <p class="auth-subtitle">Управление данными оператора</p>
+        </div>
+
+        <div id="user-info" class="user-data-display">
+          <p class="auth-subtitle">Загрузка протоколов...</p>
+        </div>
+
+        <hr
+          style="border: 0; border-top: 1px solid var(--border); margin: 24px 0"
+        />
+
+        <form id="updateProfileForm" class="auth-form">
+          <div class="input-group">
+            <label for="new-login" class="input-label">Новый Логин</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="new-login"
+                class="input-field"
+                placeholder="Оставьте пустым, если не меняете"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="new-email" class="input-label">Новый Email</label>
+            <div class="input-wrapper">
+              <input
+                type="email"
+                id="new-email"
+                class="input-field"
+                placeholder="example@mail.com"
+              />
+            </div>
+          </div>
+
+          <div id="form-feedback" class="form-message hidden"></div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span class="btn-text">Обновить профиль</span>
+            <span class="btn-loader"></span>
+          </button>
+        </form>
+
+        <div class="auth-footer" style="margin-top: 24px">
+          <a href="/" class="link-accent">← Вернуться на главную</a>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("updateProfileForm");
+      const feedback = document.getElementById("form-feedback");
+      const submitBtn = document.getElementById("submitBtn");
+
+      // Функция загрузки профиля
+      async function loadProfile() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          window.location.href = "/login.html";
+          return;
+        }
+
+        try {
+          const response = await fetch("/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.ok) {
+            const user = await response.json();
+            renderUserInfo(user);
+          } else {
+            throw new Error("Сессия истекла");
+          }
+        } catch (err) {
+          localStorage.removeItem("access_token");
+          window.location.href = "/login.html";
+        }
       }
-    } catch (err) {
-      localStorage.removeItem("access_token");
-      window.location.href = "/login.html";
-    }
-  }
-  document.addEventListener("DOMContentLoaded", loadProfile);
-</script>
+
+      function renderUserInfo(user) {
+        const infoDiv = document.getElementById("user-info");
+        const statusClass = user.is_verified ? "text-success" : "text-error";
+        const statusText = user.is_verified
+          ? "Верифицирован"
+          : "Ожидает подтверждения";
+
+        infoDiv.innerHTML = `
+                <div style="text-align: left; font-size: 0.9rem;">
+                    <p style="margin-bottom: 8px;"><strong>ID:</strong> <span style="color: var(--accent-cyan);">${
+                      user.uuid
+                    }</span></p>
+                    <p style="margin-bottom: 8px;"><strong>Логин:</strong> ${
+                      user.login || "—"
+                    }</p>
+                    <p style="margin-bottom: 8px;"><strong>Email:</strong> ${
+                      user.email || "—"
+                    }</p>
+                    <p><strong>Статус:</strong> <span class="${statusClass}">${statusText}</span></p>
+                </div>
+            `;
+
+        // Если Email не верифицирован, показываем предупреждение (Рекомендация №3)
+        if (!user.is_verified && user.email) {
+          showFeedback(
+            "Требуется подтверждение нового Email. Проверьте почту.",
+            "error"
+          );
+        }
+      }
+
+      function showFeedback(msg, type) {
+        feedback.textContent = msg;
+        feedback.className = `form-message ${type}`;
+        feedback.classList.remove("hidden");
+      }
+
+      // Реализация updateProfile (Рекомендация №2)
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        feedback.classList.add("hidden");
+
+        const token = localStorage.getItem("access_token");
+        const payload = {};
+
+        const loginVal = document.getElementById("new-login").value.trim();
+        const emailVal = document.getElementById("new-email").value.trim();
+
+        if (loginVal) payload.login = loginVal;
+        if (emailVal) payload.email = emailVal;
+
+        if (Object.keys(payload).length === 0) {
+          showFeedback("Введите данные для обновления", "error");
+          return;
+        }
+
+        submitBtn.classList.add("loading");
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch("/auth/me", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showFeedback("Профиль успешно обновлен", "success");
+            renderUserInfo(data);
+            form.reset();
+          } else {
+            // Обработка ошибок уникальности (409) и валидации
+            const errorMsg = data.detail || "Ошибка при обновлении";
+            showFeedback(
+              Array.isArray(errorMsg) ? errorMsg[0].msg : errorMsg,
+              "error"
+            );
+          }
+        } catch (err) {
+          showFeedback("Ошибка соединения с сервером", "error");
+        } finally {
+          submitBtn.classList.remove("loading");
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Эффект прожектора для карточки (аналогично login.js)
+      document.addEventListener("mousemove", (e) => {
+        const card = document.getElementById("authCard");
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+      });
+
+      document.addEventListener("DOMContentLoaded", loadProfile);
+    </script>
+
+    <style>
+      .text-success {
+        color: var(--accent-success);
+      }
+      .text-error {
+        color: var(--accent-error);
+        font-weight: 600;
+      }
+      .user-data-display {
+        margin-bottom: 20px;
+      }
+    </style>
+  </body>
+</html>
