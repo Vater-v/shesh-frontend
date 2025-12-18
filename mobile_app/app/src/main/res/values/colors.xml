@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--colors.xml-->
-<resources>
-    <color name="shesh_deep_void">#0B0B15</color> <color name="shesh_cyan">#00F0FF</color>      <color name="shesh_magenta">#BC13FE</color>   <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-</resources>
