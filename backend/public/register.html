@@ -145,26 +145,45 @@
               <form
                 class="auth-form"
                 id="protocol-a"
-                action="/api/register/standard"
+                action="/auth/register"
                 method="POST"
                 role="tabpanel"
                 aria-labelledby="tab-protocol-a"
               >
+                <div
+                  id="error-global-operational"
+                  class="form-error-placeholder"
+                  aria-live="polite"
+                  style="
+                    display: none;
+                    color: #ff4d4d;
+                    font-size: 0.9rem;
+                    margin-bottom: 1rem;
+                  "
+                ></div>
+
                 <div class="auth-form__group">
-                  <label for="reg-username" class="auth-form__label"
+                  <label for="reg-login" class="auth-form__label"
                     >Идентификатор (Login)</label
                   >
                   <div class="auth-form__input-wrapper">
                     <input
                       type="text"
-                      id="reg-username"
-                      name="username"
+                      id="reg-login"
+                      name="login"
                       class="auth-form__input"
                       placeholder="user_id"
-                      required
+                      minlength="3"
+                      pattern="^[a-zA-Z0-9_.-]+$"
+                      title="Only letters, numbers, underscores, dots, and hyphens. No '@'."
                       autocomplete="username"
                     />
                   </div>
+                  <div
+                    id="error-reg-login"
+                    class="form-error-placeholder"
+                    style="color: #ff4d4d; font-size: 0.75rem; margin-top: 4px"
+                  ></div>
                 </div>
 
                 <div class="auth-form__group">
@@ -182,6 +201,11 @@
                       autocomplete="email"
                     />
                   </div>
+                  <div
+                    id="error-reg-email"
+                    class="form-error-placeholder"
+                    style="color: #ff4d4d; font-size: 0.75rem; margin-top: 4px"
+                  ></div>
                 </div>
 
                 <div class="auth-form__group">
@@ -196,7 +220,7 @@
                       class="auth-form__input auth-form__input--password"
                       placeholder="••••••••••••"
                       required
-                      minlength="12"
+                      minlength="8"
                       autocomplete="new-password"
                     />
                     <button
@@ -207,6 +231,11 @@
                       👁️
                     </button>
                   </div>
+                  <div
+                    id="error-reg-password"
+                    class="form-error-placeholder"
+                    style="color: #ff4d4d; font-size: 0.75rem; margin-top: 4px"
+                  ></div>
                 </div>
 
                 <div class="auth-form__actions">
@@ -222,7 +251,7 @@
               <form
                 class="auth-form"
                 id="protocol-b"
-                action="/api/register/ghost"
+                action="/auth/register"
                 method="POST"
                 hidden
                 role="tabpanel"
@@ -243,19 +272,39 @@
                   </div>
                 </div>
 
+                <div
+                  id="error-global-ghost"
+                  class="form-error-placeholder"
+                  aria-live="polite"
+                  style="
+                    display: none;
+                    color: #ff4d4d;
+                    font-size: 0.9rem;
+                    margin-bottom: 1rem;
+                  "
+                ></div>
+
                 <div class="auth-form__group">
-                  <label for="ghost-alias" class="auth-form__label"
+                  <label for="ghost-login" class="auth-form__label"
                     >Псевдоним (Alias)</label
                   >
                   <input
                     type="text"
-                    id="ghost-alias"
-                    name="alias"
+                    id="ghost-login"
+                    name="login"
                     class="auth-form__input auth-form__input--mono"
                     placeholder="GHOST_UNIT_X"
                     required
+                    minlength="3"
+                    pattern="^[a-zA-Z0-9_.-]+$"
+                    title="Only letters, numbers, underscores, dots, and hyphens. No '@'."
                     autocomplete="off"
                   />
+                  <div
+                    id="error-ghost-login"
+                    class="form-error-placeholder"
+                    style="color: #ff4d4d; font-size: 0.75rem; margin-top: 4px"
+                  ></div>
                 </div>
 
                 <div class="auth-form__group">
@@ -266,14 +315,13 @@
                     <input
                       type="text"
                       id="ghost-local-key"
-                      name="local_key"
                       class="auth-form__input auth-form__input--code"
                       value="[WAITING_ENTROPY...]"
                       readonly
                     />
                     <button
                       type="button"
-                      class="btn btn--small btn--outline"
+                      class="btn btn--small btn--outline btn--regen"
                       aria-label="Сгенерировать"
                     >
                       RE-GEN
@@ -295,6 +343,7 @@
                       name="password"
                       class="auth-form__input"
                       required
+                      minlength="8"
                       autocomplete="new-password"
                     />
                     <button
@@ -305,6 +354,11 @@
                       👁️
                     </button>
                   </div>
+                  <div
+                    id="error-ghost-password"
+                    class="form-error-placeholder"
+                    style="color: #ff4d4d; font-size: 0.75rem; margin-top: 4px"
+                  ></div>
                 </div>
 
                 <div class="auth-form__actions">
