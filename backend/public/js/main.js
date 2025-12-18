@@ -1,94 +1,101 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const navToggle = document.querySelector(".mobile-toggle");
-  const navMenu = document.querySelector(".header__nav");
-  const body = document.body;
+/**
+ * SHESH SYSTEM - Global UI Controller
+ * Handles: Mobile Navigation, Spotlight Effects, and System Logging.
+ */
+const SheshUI = (() => {
+  "use strict";
 
-  /* --- 1. Мобильная навигация --- */
-  if (navToggle && navMenu) {
-    const toggleMenu = (shouldOpen) => {
-      navToggle.setAttribute("aria-expanded", shouldOpen);
-      if (shouldOpen) {
-        navMenu.classList.add("is-open");
-        navToggle.classList.add("is-active");
-        body.style.overflow = "hidden";
-      } else {
-        navMenu.classList.remove("is-open");
-        navToggle.classList.remove("is-active");
-        body.style.overflow = "auto";
-      }
+  // State management for UI components
+  const state = {
+    isNavOpen: false,
+    lastSpotlightUpdate: 0,
+  };
+
+  /**
+   * Mobile Navigation Logic
+   * Manages ARIA states and scroll-locking for the terminal menu.
+   */
+  const initMobileNav = () => {
+    const navToggle = document.querySelector(".mobile-toggle");
+    const navMenu = document.querySelector(".header__nav");
+    const body = document.body;
+
+    if (!navToggle || !navMenu) return;
+
+    const toggleMenu = (open) => {
+      state.isNavOpen = open;
+      navToggle.setAttribute("aria-expanded", open);
+      navToggle.classList.toggle("is-active", open);
+      navMenu.classList.toggle("is-open", open);
+
+      // Prevent background scrolling when menu is active
+      body.style.overflow = open ? "hidden" : "";
     };
 
     navToggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isOpened = navToggle.getAttribute("aria-expanded") === "true";
-      toggleMenu(!isOpened);
+      toggleMenu(!state.isNavOpen);
     });
 
-    navMenu.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => toggleMenu(false));
-    });
-
+    // Close menu on link click or clicking outside
     document.addEventListener("click", (e) => {
-      if (
-        navToggle.getAttribute("aria-expanded") === "true" &&
-        !navMenu.contains(e.target) &&
-        !navToggle.contains(e.target)
-      ) {
+      if (state.isNavOpen && !navMenu.contains(e.target)) {
         toggleMenu(false);
       }
     });
-  }
+  };
 
-  /* --- 2. Эффект Spotlight для карточек --- */
-  const cards = document.querySelectorAll(".feature-card, .auth-terminal");
-  cards.forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
+  /**
+   * Spotlight Effect
+   * Optimized mouse-tracking gradient for interactive cards.
+   */
+  const initSpotlight = () => {
+    const cards = document.querySelectorAll(
+      ".feature-card, .terminal, .auth-form"
+    );
+
+    const updateSpotlight = (e) => {
+      // Throttled using requestAnimationFrame for performance
       requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-        card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-      });
-    });
-  });
+        cards.forEach((card) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
 
-  /* --- 3. Переключатель протоколов (Auth Switcher) --- */
-  const protocolTabs = document.querySelectorAll(".protocol-switcher__btn");
-  if (protocolTabs.length > 0) {
-    protocolTabs.forEach((tab) => {
-      tab.addEventListener("click", (e) => {
-        // Визуальное переключение табов
-        protocolTabs.forEach((t) => {
-          t.setAttribute("aria-selected", "false");
-          t.classList.remove("protocol-switcher__btn--active");
+          card.style.setProperty("--mouse-x", `${x}px`);
+          card.style.setProperty("--mouse-y", `${y}px`);
         });
-        tab.setAttribute("aria-selected", "true");
-        tab.classList.add("protocol-switcher__btn--active");
-
-        // Переключение видимости форм
-        const targetId = tab.getAttribute("aria-controls");
-        document
-          .querySelectorAll(".auth-form")
-          .forEach((form) => (form.hidden = true));
-        const targetForm = document.getElementById(targetId);
-        if (targetForm) targetForm.hidden = false;
-
-        // Генерация ключа для Ghost-протокола
-        if (targetId === "protocol-b") {
-          const keyInput = document.getElementById("ghost-local-key");
-          if (
-            keyInput &&
-            (keyInput.value === "" || keyInput.value.includes("WAITING"))
-          ) {
-            generateGhostKey();
-          }
-        }
       });
-    });
-  }
+    };
 
-  console.log(
-    "%c SHESH SYSTEM %c ONLINE ",
-    "background: #00e5ff; color: #000; font-weight: bold; padding: 4px;",
-    "background: #121212; color: #00e5ff; padding: 4px;"
-  );
-});
+    if (cards.length > 0) {
+      window.addEventListener("mousemove", updateSpotlight);
+    }
+  };
+
+  /**
+   * Stylized System Logging
+   */
+  const logSystemStatus = () => {
+    const styles = {
+      cyan: "background: #00e5ff; color: #000; font-weight: bold; padding: 4px; border-radius: 2px;",
+      dark: "background: #121212; color: #00e5ff; padding: 4px; border: 1px solid #00e5ff;",
+    };
+    console.log(
+      "%c SHESH SYSTEM %c STABLE / ONLINE ",
+      styles.cyan,
+      styles.dark
+    );
+  };
+
+  return {
+    init: () => {
+      initMobileNav();
+      initSpotlight();
+      logSystemStatus();
+    },
+  };
+})();
+
+// Initialize on DOM Ready
+document.addEventListener("DOMContentLoaded", SheshUI.init);
