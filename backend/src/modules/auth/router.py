@@ -7,7 +7,6 @@ from . import database, schemas, service, models, security
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-# Used for Swagger UI support
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # --- Dependencies ---
@@ -39,6 +38,7 @@ async def register(
     svc: service.AuthService = Depends(get_auth_service),
     user_agent: str = Header(None)
 ):
+    # Registration logic includes conflict checks and verification triggering
     return await svc.register_user(payload)
 
 @router.post("/login", response_model=schemas.Token)
@@ -84,13 +84,11 @@ async def forgot_password(
     payload: schemas.ForgotPasswordRequest,
     svc: service.AuthService = Depends(get_auth_service)
 ):
-    # We return success even if email not found to prevent enumeration
     await svc.forgot_password(payload.email)
     return {"message": "If email exists, reset link sent"}
 
 @router.post("/password/confirm", response_model=schemas.MessageResponse)
 async def confirm_reset(payload: schemas.PasswordResetConfirm):
-    # Simply validating the token structure/signature here
     if not security.decode_token(payload.token):
         raise HTTPException(status_code=400, detail="Invalid token")
     return {"message": "Token is valid"}

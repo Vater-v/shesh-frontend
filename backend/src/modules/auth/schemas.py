@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, model_validator
 from typing import Optional
+import re
 
 # --- Auth & Tokens ---
 class Token(BaseModel):
@@ -15,18 +16,38 @@ class LogoutRequest(BaseModel):
 
 # --- User Operations ---
 class UserRegister(BaseModel):
-    login: str = Field(min_length=3)
-    email: EmailStr
+    login: Optional[str] = Field(None, min_length=3, description="Unique username")
+    email: Optional[EmailStr] = Field(None, description="Unique email address")
     password: str = Field(min_length=8)
 
+    @model_validator(mode='after')
+    def validate_credentials(self) -> 'UserRegister':
+        login = self.login
+        email = self.email
+
+        # 1. Ensure at least one credential is provided
+        if not login and not email:
+            raise ValueError("Either 'login' or 'email' must be provided.")
+
+        # 2. Validate Login format to prevent ambiguity with Email
+        if login:
+            if "@" in login:
+                raise ValueError("Login field cannot contain '@'. Please use the email field for email addresses.")
+            
+            # Optional: Strict regex for login (Alphanumeric, underscores, hyphens, dots)
+            if not re.match(r"^[a-zA-Z0-9_.-]+$", login):
+                raise ValueError("Login contains invalid characters.")
+
+        return self
+
 class UserLogin(BaseModel):
-    credential: str # Email or Login
+    credential: str # Can be Login or Email
     password: str
 
 class UserRead(BaseModel):
     uuid: str
-    login: str
-    email: EmailStr
+    login: Optional[str]
+    email: Optional[EmailStr]
     is_verified: bool
     
     model_config = ConfigDict(from_attributes=True)

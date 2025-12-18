@@ -7,11 +7,19 @@ from .database import Base
 class User(Base):
     __tablename__ = "users"
 
+    # Server-generated UUID
     uuid: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    login: Mapped[str] = mapped_column(String, unique=True, index=True)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    
+    # Login and Email are nullable, unique, and indexed.
+    # Logic ensures at least one is provided.
+    login: Mapped[str | None] = mapped_column(String, unique=True, index=True, nullable=True)
+    email: Mapped[str | None] = mapped_column(String, unique=True, index=True, nullable=True)
+    
     password_hash: Mapped[str] = mapped_column(String)
+    
+    # Verification Logic
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    verification_token: Mapped[str | None] = mapped_column(String, nullable=True)
     
     # Relationships
     sessions: Mapped[list["Session"]] = relationship(
@@ -24,7 +32,7 @@ class Session(Base):
     uuid: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_uuid: Mapped[str] = mapped_column(String, ForeignKey("users.uuid"))
     refresh_token_hash: Mapped[str] = mapped_column(String, index=True)
-    user_agent: Mapped[str] = mapped_column(String, nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String, nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
 
     user: Mapped["User"] = relationship("User", back_populates="sessions")

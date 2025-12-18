@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, delete
 from fastapi import HTTPException, status
@@ -11,6 +12,7 @@ class AuthService:
 
     # --- Utils ---
     def mock_email(self, to: str, subject: str, body: str):
+        # In production, replace with actual email sending logic
         print(f"\n[MOCK EMAIL] To: {to} | Subject: {subject}")
         print(f"Body: {body}\n")
 
@@ -19,28 +21,67 @@ class AuthService:
 
     # --- Core Auth ---
     async def register_user(self, payload: schemas.UserRegister) -> schemas.Token:
-        # Check existing
-        result = await self.db.execute(select(models.User).where(
-            or_(models.User.email == payload.email, models.User.login == payload.login)
-        ))
-        if result.scalar_one_or_none():
-            raise HTTPException(status_code=409, detail="User already exists")
+        # 1. Dynamic Check for existing users based on provided fields
+        conditions = []
+        if payload.email:
+            conditions.append(models.User.email == payload.email)
+        if payload.login:
+            conditions.append(models.User.login == payload.login)
+        
+        # We use OR because if either matches, we have a conflict
+        if conditions:
+            stmt = select(models.User).where(or_(*conditions))
+            result = await self.db.execute(stmt)
+            existing_user = result.scalar_one_or_none()
+            
+            if existing_user:
+                # Provide specific error messages for UX
+                if payload.email and existing_user.email == payload.email:
+                    raise HTTPException(status_code=409, detail="Email is already taken")
+                if payload.login and existing_user.login == payload.login:
+                    raise HTTPException(status_code=409, detail="Login is already taken")
+                raise HTTPException(status_code=409, detail="User already exists")
+        
+        # 2. Determine Verification Status
+        # - Email provided: Require verification (is_verified = False)
+        # - Login only: Immediate activation (is_verified = True)
+        is_verified = True
+        verification_token = None
+        
+        if payload.email:
+            is_verified = False
+            # Generate a secure random string for the DB token
+            verification_token = str(uuid.uuid4())
 
+        # 3. Create User
         new_user = models.User(
             login=payload.login,
             email=payload.email,
-            password_hash=security.get_password_hash(payload.password)
+            password_hash=security.get_password_hash(payload.password),
+            is_verified=is_verified,
+            verification_token=verification_token
         )
+        
         self.db.add(new_user)
         await self.db.commit()
         await self.db.refresh(new_user)
-        
+
+        # 4. Trigger Email Flow if needed
+        if payload.email and verification_token:
+            self.mock_email(payload.email, "Verify Account", f"Token: {verification_token}")
+
+        # 5. Return Session (Auto-login)
         return await self.create_session(new_user)
 
     async def login_user(self, payload: schemas.UserLogin, user_agent: str) -> schemas.Token:
-        result = await self.db.execute(select(models.User).where(
-            or_(models.User.email == payload.credential, models.User.login == payload.credential)
-        ))
+        # Search against BOTH login and email columns
+        stmt = select(models.User).where(
+            or_(
+                models.User.email == payload.credential,
+                models.User.login == payload.credential
+            )
+        )
+        result = await self.db.execute(stmt)
         user = result.scalar_one_or_none()
         
         if not user or not security.verify_password(payload.password, user.password_hash):
@@ -52,13 +93,13 @@ class AuthService:
         access_token = security.create_access_token(user.uuid)
         refresh_token = security.create_refresh_token(user.uuid)
         
-        # Store Hash in DB
         expires_at = datetime.now(timezone.utc) + timedelta(days=config.settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        
         session_record = models.Session(
             user_uuid=user.uuid,
             refresh_token_hash=security.hash_token(refresh_token),
             user_agent=user_agent,
-            expires_at=expires_at.replace(tzinfo=None) # SQLite compatibility
+            expires_at=expires_at.replace(tzinfo=None)
         )
         self.db.add(session_record)
         await self.db.commit()
@@ -66,7 +107,6 @@ class AuthService:
         return schemas.Token(access_token=access_token, refresh_token=refresh_token)
 
     async def refresh_token(self, token: str, user_agent: str) -> schemas.Token:
-        # 1. Decode (Is it a valid JWT?)
         payload = security.decode_token(token)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -74,13 +114,11 @@ class AuthService:
         user_uuid = payload["sub"]
         token_hash = security.hash_token(token)
         
-        # 2. Check DB (Is the session active?)
         result = await self.db.execute(select(models.Session).where(
             models.Session.refresh_token_hash == token_hash
         ))
         session_record = result.scalar_one_or_none()
         
-        # Security: If token is valid JWT but not in DB -> Token Reuse / Revoked
         if not session_record:
             raise HTTPException(status_code=401, detail="Session invalid or revoked")
         
@@ -89,7 +127,6 @@ class AuthService:
             await self.db.commit()
             raise HTTPException(status_code=401, detail="Session expired")
 
-        # 3. Rotate (Delete Old, Create New)
         await self.db.delete(session_record)
         
         user = await self.get_user_by_uuid(user_uuid)
@@ -116,7 +153,7 @@ class AuthService:
         if not security.verify_password(password, user.password_hash):
             raise HTTPException(status_code=403, detail="Invalid password")
             
-        await self.db.delete(user) # Cascade deletes sessions
+        await self.db.delete(user)
         await self.db.commit()
 
     # --- Password Recovery ---
@@ -142,8 +179,6 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
             
         user.password_hash = security.get_password_hash(new_password)
-        
-        # Security Rule: Delete ALL sessions on password reset
         await self.db.execute(delete(models.Session).where(models.Session.user_uuid == user_uuid))
         await self.db.commit()
 
@@ -157,16 +192,25 @@ class AuthService:
 
     # --- Verification ---
     async def send_verification(self, user: models.User) -> str:
-        token = security.create_token(user.uuid, "verify", timedelta(hours=config.settings.VERIFY_TOKEN_EXPIRE_HOURS))
+        if not user.email:
+             raise HTTPException(status_code=400, detail="User has no email to verify.")
+
+        # Generate new DB token (UUID)
+        token = str(uuid.uuid4())
+        user.verification_token = token
+        await self.db.commit()
+        
         self.mock_email(user.email, "Verify Account", f"Token: {token}")
         return token
 
     async def verify_email(self, token: str):
-        payload = security.decode_token(token)
-        if not payload or payload.get("type") != "verify":
-            raise HTTPException(status_code=400, detail="Invalid token")
+        # Verify against the DB column directly
+        result = await self.db.execute(select(models.User).where(models.User.verification_token == token))
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=400, detail="Invalid or expired verification token")
             
-        user = await self.get_user_by_uuid(payload["sub"])
-        if user:
-            user.is_verified = True
-            await self.db.commit()
+        user.is_verified = True
+        user.verification_token = None # One-time use
+        await self.db.commit()
