@@ -7,39 +7,44 @@ import 'features/onboarding/presentation/pages/onboarding_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Фиксируем ориентацию для лучшего UX на мобильных
+
+  // 1. Инициализируем локальное хранилище до запуска приложения
+  // Это позволяет получать данные (например, вошел ли юзер) мгновенно и синхронно.
+  await LocalStorageService.init();
+
+  // 2. Фиксируем портретную ориентацию
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
   ]);
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Логика выбора начального экрана
-  Future<Widget> _getInitialScreen() async {
-    final localStorage = LocalStorageService();
-    final hasSeenOnboarding = await localStorage.hasSeenOnboarding();
-    final isLoggedIn = await localStorage.isLoggedIn();
-
-    if (!hasSeenOnboarding) {
-      return const OnboardingScreen();
-    } else if (isLoggedIn) {
-      return const HomeScreen();
-    } else {
-      return const WelcomeScreen();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Получаем экземпляр сервиса (он уже инициализирован)
+    final localStorage = LocalStorageService();
+
+    // 3. Определяем стартовый экран синхронно (без FutureBuilder)
+    Widget initialScreen;
+    if (!localStorage.hasSeenOnboarding) {
+      initialScreen = const OnboardingScreen();
+    } else if (localStorage.isLoggedIn) {
+      initialScreen = const HomeScreen();
+    } else {
+      initialScreen = const WelcomeScreen();
+    }
+
     return MaterialApp(
       title: 'Shesh Backgammon',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark, // Принудительная темная тема для стиля "Премиум"
+      themeMode: ThemeMode.dark,
 
-      // Темная тема (основная)
+      // Темная тема
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -51,7 +56,7 @@ class MyApp extends StatelessWidget {
           onPrimary: Colors.black,
           onSurface: Colors.white,
         ),
-        fontFamily: 'Roboto', // Можно заменить на более стильный шрифт позже
+        fontFamily: 'Roboto',
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFD4AF37),
@@ -72,18 +77,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: FutureBuilder<Widget>(
-        future: _getInitialScreen(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              backgroundColor: Color(0xFF121212),
-              body: Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37))),
-            );
-          }
-          return snapshot.data ?? const WelcomeScreen();
-        },
-      ),
+      // Передаем вычисленный экран сразу
+      home: initialScreen,
     );
   }
 }

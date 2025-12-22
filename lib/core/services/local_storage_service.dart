@@ -2,30 +2,31 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
   static const String _onboardingKey = 'hasSeenOnboarding';
-  static const String _authKey = 'isLoggedIn'; // Ключ для хранения статуса входа
+  static const String _authKey = 'isLoggedIn';
+
+  // Статическая переменная для хранения экземпляра SharedPreferences
+  static SharedPreferences? _prefs;
+
+  // Метод инициализации. Вызывается один раз в main.dart перед запуском UI.
+  static Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
 
   // --- Онбординг ---
 
+  // Теперь это синхронное свойство (геттер), данные доступны мгновенно
+  bool get hasSeenOnboarding => _prefs?.getBool(_onboardingKey) ?? false;
+
   Future<void> setOnboardingSeen() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingKey, true);
+    await _prefs?.setBool(_onboardingKey, true);
   }
 
-  Future<bool> hasSeenOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_onboardingKey) ?? false;
-  }
+  // --- Авторизация ---
 
-  // --- Авторизация (Методы, которые вызывает main.dart) ---
+  // Синхронная проверка статуса входа
+  bool get isLoggedIn => _prefs?.getBool(_authKey) ?? false;
 
   Future<void> setLoggedIn(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_authKey, value);
-  }
-
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Если ключа нет, считаем, что пользователь не вошел (false)
-    return prefs.getBool(_authKey) ?? false;
+    await _prefs?.setBool(_authKey, value);
   }
 }
