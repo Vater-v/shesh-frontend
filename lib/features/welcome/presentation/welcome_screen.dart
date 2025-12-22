@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../../core/services/local_storage_service.dart';
+// Импортируем новые экраны
+import '../../auth/presentation/pages/login_screen.dart';
+import '../../auth/presentation/pages/registration_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
-  Future<void> _login(BuildContext context) async {
+  // Метод для гостевого входа (оставляем быструю логику)
+  Future<void> _loginAsGuest(BuildContext context) async {
+    // Можно сохранить флаг isGuest = true, если нужно
     await LocalStorageService().setLoggedIn(true);
 
     if (context.mounted) {
-      // Плавный переход с затуханием (Fade Transition)
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const HomeScreen(),
@@ -26,7 +30,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Фон: Градиент
+          // 1. Фон: Градиент (тот же, что и был)
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -50,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(flex: 2),
-                  // Логотип
+                  // Логотип (тот же)
                   Center(
                     child: Container(
                       width: 120,
@@ -93,19 +97,35 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   const Spacer(flex: 3),
 
-                  // Кнопки
+                  // ОБНОВЛЕННЫЕ КНОПКИ
+
+                  // Кнопка ВОЙТИ -> Ведет на LoginScreen
                   ElevatedButton(
-                    onPressed: () => _login(context),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginScreen())
+                      );
+                    },
                     child: const Text("ВОЙТИ"),
                   ),
                   const SizedBox(height: 16),
+
+                  // Кнопка СОЗДАТЬ АККАУНТ -> Ведет на RegistrationScreen
                   OutlinedButton(
-                    onPressed: () => _login(context),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegistrationScreen())
+                      );
+                    },
                     child: const Text("СОЗДАТЬ АККАУНТ"),
                   ),
                   const SizedBox(height: 24),
+
+                  // Кнопка ГОСТЬ -> Ведет сразу в игру
                   TextButton(
-                    onPressed: () => _login(context),
+                    onPressed: () => _loginAsGuest(context),
                     child: Text(
                       "Играть как Гость",
                       style: TextStyle(color: Colors.white.withOpacity(0.5)),
