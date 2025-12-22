@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../features/onboarding/presentation/pages/onboarding_screen.dart';
-// Импорт экрана игры
 import '../../game/presentation/game_board_screen.dart';
+import '../../../../core/services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,38 +22,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Используем IndexedStack чтобы сохранять состояние страниц
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           indicatorColor: const Color(0xFFD4AF37).withOpacity(0.2),
-          labelTextStyle: MaterialStateProperty.all(
-            const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70),
-          ),
+          labelTextStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) => setState(() => _currentIndex = index),
           backgroundColor: const Color(0xFF1E1E1E),
           destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.videogame_asset_outlined),
-              selectedIcon: Icon(Icons.videogame_asset, color: Color(0xFFD4AF37)),
-              label: 'Лобби',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.history_outlined),
-              selectedIcon: Icon(Icons.history, color: Color(0xFFD4AF37)),
-              label: 'История',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person, color: Color(0xFFD4AF37)),
-              label: 'Профиль',
-            ),
+            NavigationDestination(icon: Icon(Icons.videogame_asset_outlined), selectedIcon: Icon(Icons.videogame_asset, color: Color(0xFFD4AF37)), label: 'Лобби'),
+            NavigationDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history, color: Color(0xFFD4AF37)), label: 'История'),
+            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person, color: Color(0xFFD4AF37)), label: 'Профиль'),
           ],
         ),
       ),
@@ -62,12 +43,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _LobbyView extends StatelessWidget {
+class _LobbyView extends StatefulWidget {
   const _LobbyView();
 
+  @override
+  State<_LobbyView> createState() => _LobbyViewState();
+}
+
+class _LobbyViewState extends State<_LobbyView> {
+  String _username = "Игрок";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final user = await ApiService().getMe();
+      if (mounted && user.login != null) {
+        setState(() {
+          _username = user.login!;
+        });
+      }
+    } catch (e) {
+      // Игнорируем ошибки при загрузке профиля
+    }
+  }
+
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await ApiService().logout();
     if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -84,7 +90,6 @@ class _LobbyView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Хедер с приветствием
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -93,14 +98,11 @@ class _LobbyView extends StatelessWidget {
                   children: [
                     Text("Добро пожаловать,", style: TextStyle(color: Colors.white.withOpacity(0.6))),
                     const SizedBox(height: 4),
-                    const Text("Чемпион", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text(_username, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                   ],
                 ),
                 Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(12)),
                   child: IconButton(
                     icon: const Icon(Icons.logout, size: 20),
                     onPressed: () => _logout(context),
@@ -109,16 +111,10 @@ class _LobbyView extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 32),
-
-            // Главная карточка "Быстрая игра"
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const GameBoardScreen()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const GameBoardScreen()));
               },
               child: Container(
                 height: 180,
@@ -126,29 +122,15 @@ class _LobbyView extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFFD4AF37),
-                      const Color(0xFFD4AF37).withOpacity(0.7),
-                    ],
+                    colors: [const Color(0xFFD4AF37), const Color(0xFFD4AF37).withOpacity(0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD4AF37).withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
                 ),
                 child: Stack(
                   children: [
-                    Positioned(
-                      right: -30,
-                      bottom: -30,
-                      child: Icon(Icons.casino, size: 200, color: Colors.white.withOpacity(0.2)),
-                    ),
-                    // ИСПРАВЛЕНИЕ: Убран const перед Padding, так как внутри есть Container
+                    Positioned(right: -30, bottom: -30, child: Icon(Icons.casino, size: 200, color: Colors.white.withOpacity(0.2))),
                     Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
@@ -157,10 +139,7 @@ class _LobbyView extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: const BoxDecoration(
-                              color: Colors.black26,
-                              borderRadius: BorderRadius.all(Radius.circular(20)),
-                            ),
+                            decoration: const BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.all(Radius.circular(20))),
                             child: const Text("ONLINE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
                           ),
                           const SizedBox(height: 12),
@@ -173,12 +152,9 @@ class _LobbyView extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 32),
             const Text("Режимы игры", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-
-            // Сетка режимов
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -187,26 +163,10 @@ class _LobbyView extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.3,
               children: const [
-                _GameModeItem(
-                  title: "С компьютером",
-                  icon: Icons.computer,
-                  color: Color(0xFF4A90E2),
-                ),
-                _GameModeItem(
-                  title: "С другом",
-                  icon: Icons.people_alt,
-                  color: Color(0xFF50E3C2),
-                ),
-                _GameModeItem(
-                  title: "Турнир",
-                  icon: Icons.emoji_events,
-                  color: Color(0xFF9013FE),
-                ),
-                _GameModeItem(
-                  title: "Обучение",
-                  icon: Icons.school,
-                  color: Color(0xFFFF9F00),
-                ),
+                _GameModeItem(title: "С компьютером", icon: Icons.computer, color: Color(0xFF4A90E2)),
+                _GameModeItem(title: "С другом", icon: Icons.people_alt, color: Color(0xFF50E3C2)),
+                _GameModeItem(title: "Турнир", icon: Icons.emoji_events, color: Color(0xFF9013FE)),
+                _GameModeItem(title: "Обучение", icon: Icons.school, color: Color(0xFFFF9F00)),
               ],
             ),
           ],
@@ -221,11 +181,7 @@ class _GameModeItem extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _GameModeItem({
-    required this.title,
-    required this.icon,
-    required this.color,
-  });
+  const _GameModeItem({required this.title, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -245,10 +201,7 @@ class _GameModeItem extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 28),
               ),
               const SizedBox(height: 12),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/services/local_storage_service.dart';
+import '../../../../core/services/api_service.dart';
 import '../../../home/presentation/home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -13,22 +14,39 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
   Future<void> _register() async {
     setState(() => _isLoading = true);
 
-    // TODO: Здесь логика регистрации на бэкенде
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      // 1. Запрос к бэкенду
+      final token = await _apiService.register(
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
-    await LocalStorageService().setLoggedIn(true);
+      // 2. Сохраняем токены
+      await LocalStorageService().saveTokens(token.accessToken, token.refreshToken);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-    );
+      // 3. Переход в лобби
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Ошибка: $e"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -50,55 +68,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             const Text(
               "Создать аккаунт",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 40),
-
-            // Имя пользователя
             TextField(
               controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: "Имя игрока",
+                labelText: "Логин",
                 labelStyle: const TextStyle(color: Colors.white54),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white24),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: primaryColor),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(12)),
                 prefixIcon: Icon(Icons.person_outline, color: primaryColor),
               ),
             ),
             const SizedBox(height: 16),
-
-            // Email
             TextField(
               controller: _emailController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Email",
                 labelStyle: const TextStyle(color: Colors.white54),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white24),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: primaryColor),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(12)),
                 prefixIcon: Icon(Icons.email_outlined, color: primaryColor),
               ),
             ),
             const SizedBox(height: 16),
-
-            // Пароль
             TextField(
               controller: _passwordController,
               obscureText: true,
@@ -106,24 +102,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               decoration: InputDecoration(
                 labelText: "Пароль",
                 labelStyle: const TextStyle(color: Colors.white54),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white24),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: primaryColor),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: primaryColor), borderRadius: BorderRadius.circular(12)),
                 prefixIcon: Icon(Icons.lock_outline, color: primaryColor),
               ),
             ),
             const SizedBox(height: 24),
-
             ElevatedButton(
               onPressed: _isLoading ? null : _register,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
               child: _isLoading
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
                   : const Text("ЗАРЕГИСТРИРОВАТЬСЯ"),

@@ -12,6 +12,7 @@ dependencies:
         sdk: flutter
     cupertino_icons: ^1.0.8
     shared_preferences: ^2.2.2
+    dio: ^5.4.0 # Добавлено для сетевых запросов
 
 dev_dependencies:
     flutter_test:
@@ -20,15 +21,5 @@ dev_dependencies:
 
 flutter:
     uses-material-design: true
-
-    # Ассеты для приложения
     assets:
         - assets/
-
-    # Шрифты (если понадобятся в будущем)
-    # fonts:
-    #   - family: Schyler
-    #     fonts:
-    #       - asset: fonts/Schyler-Regular.ttf
-    #       - asset: fonts/Schyler-Italic.ttf
-    #         style: italic

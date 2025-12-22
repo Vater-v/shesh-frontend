@@ -2,19 +2,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
   static const String _onboardingKey = 'hasSeenOnboarding';
-  static const String _authKey = 'isLoggedIn';
+  static const String _accessTokenKey = 'accessToken';
+  static const String _refreshTokenKey = 'refreshToken';
 
-  // Статическая переменная для хранения экземпляра SharedPreferences
   static SharedPreferences? _prefs;
 
-  // Метод инициализации. Вызывается один раз в main.dart перед запуском UI.
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
   // --- Онбординг ---
-
-  // Теперь это синхронное свойство (геттер), данные доступны мгновенно
   bool get hasSeenOnboarding => _prefs?.getBool(_onboardingKey) ?? false;
 
   Future<void> setOnboardingSeen() async {
@@ -22,11 +19,19 @@ class LocalStorageService {
   }
 
   // --- Авторизация ---
+  // Проверяем наличие токена доступа
+  bool get isLoggedIn => _prefs?.getString(_accessTokenKey) != null;
 
-  // Синхронная проверка статуса входа
-  bool get isLoggedIn => _prefs?.getBool(_authKey) ?? false;
+  String? get accessToken => _prefs?.getString(_accessTokenKey);
+  String? get refreshToken => _prefs?.getString(_refreshTokenKey);
 
-  Future<void> setLoggedIn(bool value) async {
-    await _prefs?.setBool(_authKey, value);
+  Future<void> saveTokens(String access, String refresh) async {
+    await _prefs?.setString(_accessTokenKey, access);
+    await _prefs?.setString(_refreshTokenKey, refresh);
+  }
+
+  Future<void> clearSession() async {
+    await _prefs?.remove(_accessTokenKey);
+    await _prefs?.remove(_refreshTokenKey);
   }
 }
