@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/local_storage_service.dart';
-import '../../../../core/services/api_service.dart';
-import '../../../home/presentation/home_screen.dart';
+import 'package:shesh/core/services/local_storage_service.dart';
+import 'package:shesh/core/services/api_service.dart';
+import 'package:shesh/features/home/presentation/pages/home_layout.dart'; // Изменен импорт
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -21,21 +21,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Запрос к бэкенду
       final token = await _apiService.register(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // 2. Сохраняем токены
       await LocalStorageService().saveTokens(token.accessToken, token.refreshToken);
 
       if (!mounted) return;
 
-      // 3. Переход в лобби
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const HomeLayout()),
             (route) => false,
       );
     } catch (e) {

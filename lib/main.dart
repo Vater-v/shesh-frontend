@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'features/welcome/presentation/welcome_screen.dart';
-import 'features/home/presentation/home_screen.dart';
-import 'core/services/local_storage_service.dart';
-import 'features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:shesh/core/services/local_storage_service.dart';
+import 'package:shesh/features/home/presentation/pages/home_layout.dart'; // Изменен импорт
+import 'package:shesh/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:shesh/features/welcome/presentation/welcome_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 1. Инициализируем локальное хранилище до запуска приложения
-  // Это позволяет получать данные (например, вошел ли юзер) мгновенно и синхронно.
   await LocalStorageService.init();
-
-  // 2. Фиксируем портретную ориентацию
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -26,15 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Получаем экземпляр сервиса (он уже инициализирован)
     final localStorage = LocalStorageService();
 
-    // 3. Определяем стартовый экран синхронно (без FutureBuilder)
     Widget initialScreen;
     if (!localStorage.hasSeenOnboarding) {
       initialScreen = const OnboardingScreen();
     } else if (localStorage.isLoggedIn) {
-      initialScreen = const HomeScreen();
+      // Здесь теперь используем HomeLayout
+      initialScreen = const HomeLayout();
     } else {
       initialScreen = const WelcomeScreen();
     }
@@ -43,16 +37,14 @@ class MyApp extends StatelessWidget {
       title: 'Shesh Backgammon',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-
-      // Темная тема
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212), // Глубокий черный фон
+        scaffoldBackgroundColor: const Color(0xFF121212),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFD4AF37), // Золотой (Gold)
-          secondary: Color(0xFFC0C0C0), // Серебряный
-          surface: Color(0xFF1E1E1E), // Чуть светлее для карточек
+          primary: Color(0xFFD4AF37),
+          secondary: Color(0xFFC0C0C0),
+          surface: Color(0xFF1E1E1E),
           onPrimary: Colors.black,
           onSurface: Colors.white,
         ),
@@ -76,8 +68,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-
-      // Передаем вычисленный экран сразу
       home: initialScreen,
     );
   }

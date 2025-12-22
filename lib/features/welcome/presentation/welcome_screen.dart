@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../home/presentation/home_screen.dart';
-import '../../../core/services/local_storage_service.dart';
-import '../../../core/services/api_service.dart';
-import '../../auth/presentation/pages/login_screen.dart';
-import '../../auth/presentation/pages/registration_screen.dart';
+import 'package:shesh/features/home/presentation/pages/home_layout.dart'; // Изменен импорт
+import 'package:shesh/core/services/local_storage_service.dart';
+import 'package:shesh/core/services/api_service.dart';
+import 'package:shesh/features/auth/presentation/pages/login_screen.dart';
+import 'package:shesh/features/auth/presentation/pages/registration_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -26,7 +26,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const HomeScreen(),
+            pageBuilder: (_, __, ___) => const HomeLayout(),
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(opacity: animation, child: child);
             },

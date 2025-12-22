@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/local_storage_service.dart';
-import '../../../../core/services/api_service.dart';
-import '../../../home/presentation/home_screen.dart';
+import 'package:shesh/core/services/local_storage_service.dart';
+import 'package:shesh/core/services/api_service.dart';
+// Импортируем новый лейаут
+import 'package:shesh/features/home/presentation/pages/home_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,8 +30,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
+      // Переход на HomeLayout
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const HomeLayout()),
             (route) => false,
       );
     } catch (e) {
