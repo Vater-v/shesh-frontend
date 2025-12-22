@@ -1,12 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:shesh/core/services/api_service.dart';
+import 'package:shesh/core/services/user_service.dart';
 import 'package:shesh/features/onboarding/presentation/pages/onboarding_screen.dart';
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+
+  // Диалог сохранения гостя
+  Future<void> _showUpgradeDialog() async {
+    final loginCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text("Сохранить прогресс", style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Придумайте логин и пароль, чтобы не потерять статистику при выходе.",
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: loginCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: "Логин",
+                labelStyle: TextStyle(color: Colors.white54),
+                prefixIcon: Icon(Icons.person, color: Colors.grey),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+              ),
+            ),
+            TextField(
+              controller: passCtrl,
+              obscureText: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: "Пароль",
+                labelStyle: TextStyle(color: Colors.white54),
+                prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Отмена"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                // Вызываем новый метод API
+                final newUser = await ApiService().upgradeGuest(loginCtrl.text, passCtrl.text);
+                UserService().setUser(newUser); // Обновляем состояние приложения
+
+                if (mounted) {
+                  Navigator.pop(ctx); // Закрываем диалог
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Аккаунт успешно сохранен!"), backgroundColor: Colors.green),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Ошибка: $e"), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            child: const Text("Сохранить"),
+          )
+        ],
+      ),
+    );
+  }
 
   Future<void> _logout(BuildContext context) async {
     await ApiService().logout();
+    UserService().clear(); // Чистим кэш пользователя
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -16,58 +98,99 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Stack(
-              alignment: Alignment.bottomRight,
+    // Используем ListenableBuilder, чтобы экран обновлялся при смене статуса Guest -> User
+    return ListenableBuilder(
+      listenable: UserService(),
+      builder: (context, _) {
+        final user = UserService().currentUser;
+        final isGuest = UserService().isGuest;
+
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFD4AF37), width: 3),
-                      boxShadow: [
-                        BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.3), blurRadius: 20)
-                      ]
-                  ),
-                  child: const CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Color(0xFF2C2C2C),
-                    child: Icon(Icons.person, size: 60, color: Color(0xFFD4AF37)),
-                  ),
+                const SizedBox(height: 20),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFFD4AF37), width: 3),
+                          boxShadow: [
+                            BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.3), blurRadius: 20)
+                          ]
+                      ),
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundColor: const Color(0xFF2C2C2C),
+                        child: Icon(Icons.person, size: 60, color: Theme.of(context).colorScheme.primary),
+                      ),
+                    ),
+                    if (!isGuest)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(color: Color(0xFFD4AF37), shape: BoxShape.circle),
+                        child: const Icon(Icons.edit, size: 20, color: Colors.black),
+                      )
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(color: Color(0xFFD4AF37), shape: BoxShape.circle),
-                  child: const Icon(Icons.edit, size: 20, color: Colors.black),
-                )
+                const SizedBox(height: 24),
+                Text(
+                    user?.login ?? "Гость",
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)
+                ),
+
+                // Бейдж статуса
+                if (isGuest)
+                  GestureDetector(
+                    onTap: _showUpgradeDialog,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.orange.withOpacity(0.5))
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 16),
+                          SizedBox(width: 8),
+                          Text("Аккаунт не сохранен", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                    child: const Text("Pro Player", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                  ),
+
+                const SizedBox(height: 40),
+
+                // Если гость - показываем кнопку сохранения первым пунктом
+                if (isGuest)
+                  _buildSettingsItem(Icons.save_as, "Сохранить аккаунт", onTap: _showUpgradeDialog),
+
+                _buildSettingsItem(Icons.settings, "Настройки игры"),
+                _buildSettingsItem(Icons.language, "Язык"),
+                _buildSettingsItem(Icons.help_outline, "Помощь"),
+                const Divider(color: Colors.white10, height: 30),
+                _buildSettingsItem(Icons.logout, "Выйти", isDestructive: true, onTap: () => _logout(context)),
+
+                const SizedBox(height: 100),
               ],
             ),
-            const SizedBox(height: 24),
-            const Text("Игрок", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-              child: const Text("Новичок", style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold)),
-            ),
-
-            const SizedBox(height: 40),
-
-            _buildSettingsItem(Icons.settings, "Настройки игры"),
-            _buildSettingsItem(Icons.language, "Язык"),
-            _buildSettingsItem(Icons.help_outline, "Помощь"),
-            const Divider(color: Colors.white10, height: 30),
-            _buildSettingsItem(Icons.logout, "Выйти", isDestructive: true, onTap: () => _logout(context)),
-
-            const SizedBox(height: 100),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

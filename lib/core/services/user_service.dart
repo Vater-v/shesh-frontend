@@ -11,12 +11,12 @@ class UserService extends ChangeNotifier {
   UserRead? get currentUser => _currentUser;
   bool get hasUser => _currentUser != null;
 
-  // Логика: если у пользователя нет email, считаем его Гостем (согласно вашей схеме GuestUpgrade)
+  // Логика: если у пользователя нет email, считаем его Гостем
   bool get isGuest => _currentUser?.email == null;
 
   void setUser(UserRead user) {
     _currentUser = user;
-    notifyListeners(); // <-- Уведомляем весь UI об изменениях
+    notifyListeners(); // Уведомляем слушателей (UI) об обновлении данных
   }
 
   void clear() {

@@ -42,7 +42,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       } else if (points[index].owner == 1) {
         _selectedPointIndex = index;
       }
-      // TODO: Сюда добавить логику перемещения, если пункт уже выбран
+      // TODO: Сюда добавить логику перемещения, если пункт назначения выбран валидно
     });
   }
 
@@ -105,28 +105,19 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
     for (int i = 0; i < 24; i++) {
       bool isTop = i >= 12;
-      // Визуальная позиция (0..5 справа, 6..11 слева)
-      // Для нижней части: 0 справа. Для верхней: 23 справа.
-      int visualPos = isTop ? (i - 12) : (11 - i);
-      // Корректируем порядок для нижней части, чтобы 0 был справа
-      if (!isTop) visualPos = (i < 6) ? (5 - i) : (11 - i); // Сложная маппинг логика зависит от правил, упростим:
-
-      // Простой маппинг для UI:
-      // Низ (0-11): 11..6 |BAR| 5..0
-      // Верх (12-23): 12..17 |BAR| 18..23
-
       double left;
-      // Логика координат X
+
+      // Логика координат X (классическая доска нард)
       if (isTop) {
-        if (i < 18) { // 12-17 (слева)
+        if (i < 18) { // 12-17 (слева сверху)
           left = 10 + (i - 12) * pointW;
-        } else { // 18-23 (справа)
+        } else { // 18-23 (справа сверху)
           left = 10 + barW + (i - 12) * pointW;
         }
       } else {
-        if (i < 6) { // 0-5 (справа)
+        if (i < 6) { // 0-5 (справа снизу)
           left = w - 10 - (i + 1) * pointW;
-        } else { // 6-11 (слева)
+        } else { // 6-11 (слева снизу)
           left = w - 10 - barW - (i + 1) * pointW;
         }
       }
@@ -141,7 +132,14 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
           onTap: () => _handlePointTap(i),
           behavior: HitTestBehavior.opaque,
           child: Container(
-            color: _selectedPointIndex == i ? Colors.yellow.withOpacity(0.15) : Colors.transparent,
+            // Подсветка выбранного пункта
+            decoration: BoxDecoration(
+              color: _selectedPointIndex == i ? Colors.yellow.withOpacity(0.15) : Colors.transparent,
+              borderRadius: BorderRadius.vertical(
+                top: isTop ? Radius.zero : const Radius.circular(20),
+                bottom: isTop ? const Radius.circular(20) : Radius.zero,
+              ),
+            ),
             alignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: _buildCheckersStack(points[i], pointW),
@@ -222,10 +220,33 @@ class BoardBackgroundPainter extends CustomPainter {
     double triW = (w - barW - 20) / 12;
     double triH = h * 0.4;
 
-    // Просто рисуем треугольники
-    for(int i=0; i<12; i++) {
-      // Логика отрисовки фоновых треугольников
-      // ... (код аналогичен вашему BackgammonBoardPainter, только без логики шашек)
+    // Рисуем треугольники
+    for(int i = 0; i < 12; i++) {
+      // Верхний ряд
+      bool isDark = (i % 2 == 0); // Чередование цветов
+      double topX = (i < 6) ? 10 + i * triW : 10 + barW + i * triW;
+
+      Path topTri = Path()
+        ..moveTo(topX, 0)
+        ..lineTo(topX + triW, 0)
+        ..lineTo(topX + triW / 2, triH)
+        ..close();
+      canvas.drawPath(topTri, isDark ? paintDark : paintLight);
+
+      // Нижний ряд (зеркально)
+      // Внизу индексы идут справа налево для визуального соответствия (для UI)
+      // Но здесь просто отрисовка сетки
+
+      double botX = (i < 6) ? 10 + i * triW : 10 + barW + i * triW;
+      // Инвертируем цвет для нижнего ряда, чтобы напротив темного был светлый
+      bool isBotDark = !isDark;
+
+      Path botTri = Path()
+        ..moveTo(botX, h)
+        ..lineTo(botX + triW, h)
+        ..lineTo(botX + triW / 2, h - triH)
+        ..close();
+      canvas.drawPath(botTri, isBotDark ? paintDark : paintLight);
     }
   }
   @override
