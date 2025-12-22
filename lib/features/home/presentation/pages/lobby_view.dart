@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shesh/core/services/api_service.dart';
+import 'package:shesh/core/services/user_service.dart'; // Импорт UserService
 import 'package:shesh/features/game/presentation/game_board_screen.dart';
 import 'package:shesh/features/onboarding/presentation/pages/onboarding_screen.dart';
 import '../widgets/game_mode_card.dart';
@@ -13,33 +14,47 @@ class LobbyView extends StatefulWidget {
 }
 
 class _LobbyViewState extends State<LobbyView> {
-  String _username = "Игрок";
+  // Начальное значение берем из кэша, если есть, иначе "Загрузка..."
+  String _username = UserService().currentUser?.login ?? "Загрузка...";
   final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
+    // Если по какой-то причине пользователя нет в памяти (например, горячий перезапуск),
+    // загружаем его
+    if (!UserService().hasUser) {
+      _loadUserProfile();
+    }
   }
 
   Future<void> _loadUserProfile() async {
     try {
       final user = await _apiService.getMe();
+      // Обновляем кэш
+      UserService().setUser(user);
+
       if (mounted && user.login != null) {
         setState(() {
           _username = user.login!;
         });
       }
     } catch (e) {
-      // Игнорируем ошибки при загрузке профиля (можно добавить логирование)
+      if (mounted) {
+        setState(() {
+          _username = "Гость"; // Или показываем ошибку/кнопку повтора
+        });
+      }
     }
   }
 
   Future<void> _logout(BuildContext context) async {
     await _apiService.logout();
+    UserService().clear(); // Чистим кэш пользователя
     if (!context.mounted) return;
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+          (route) => false,
     );
   }
 
