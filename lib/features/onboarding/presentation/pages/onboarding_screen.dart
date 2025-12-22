@@ -3,6 +3,7 @@ import '../../../../core/services/local_storage_service.dart';
 import '../../domain/models/onboarding_item.dart';
 import '../widgets/onboarding_content.dart';
 import '../../../home/presentation/home_screen.dart'; // Импорт вашего Home Screen
+import '../../../welcome/presentation/welcome_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -40,9 +41,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await _storageService.setOnboardingSeen();
 
     if (!mounted) return;
-    // Переход на главный экран с удалением истории (чтобы нельзя было вернуться "назад")
+
+    // ИЗМЕНЕНИЕ: Переход на WelcomeScreen вместо HomeScreen
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
     );
   }
 
