@@ -13,25 +13,51 @@ class OnboardingContent extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Здесь может быть Image.asset(item.imagePath), если есть картинки
-          // Для примера используем заглушку-иконку
-          Icon(Icons.image, size: 150, color: Theme.of(context).primaryColor),
+          // Отображаем картинку, если путь задан
+          if (item.imagePath.isNotEmpty)
+            Expanded(
+              flex: 3,
+              child: Image.asset(
+                item.imagePath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Если картинка не найдена, показываем иконку
+                  return Icon(
+                    Icons.image_not_supported,
+                    size: 100,
+                    color: Colors.white.withOpacity(0.2),
+                  );
+                },
+              ),
+            )
+          else
+            const Spacer(flex: 3), // Заполнитель, если картинки нет
+
           const SizedBox(height: 40),
-          Text(
-            item.title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            item.description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
+
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                Text(
+                  item.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Явно задаем цвет для темной темы
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  item.description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.7), // Более мягкий цвет текста
+                  ),
+                ),
+              ],
             ),
           ),
         ],

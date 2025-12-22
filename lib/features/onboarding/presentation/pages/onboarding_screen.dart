@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/local_storage_service.dart';
 import '../../domain/models/onboarding_item.dart';
 import '../widgets/onboarding_content.dart';
-import '../../../home/presentation/home_screen.dart'; // Импорт вашего Home Screen
 import '../../../welcome/presentation/welcome_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -42,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (!mounted) return;
 
-    // ИЗМЕНЕНИЕ: Переход на WelcomeScreen вместо HomeScreen
+    // Переход на WelcomeScreen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const WelcomeScreen()),
     );
@@ -51,6 +50,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar нужен для кнопки "Пропустить"
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          // Показываем кнопку "Пропустить" только если это не последний слайд
+          if (_currentPage != _items.length - 1)
+            TextButton(
+              onPressed: _completeOnboarding,
+              child: const Text(
+                "Пропустить",
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+        ],
+      ),
+      // Расширяем тело за AppBar
+      extendBodyBehindAppBar: true,
       body: SafeArea(
         child: Column(
           children: [
@@ -76,6 +93,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildBottomControls() {
+    final isLastPage = _currentPage == _items.length - 1;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Row(
@@ -92,8 +112,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: _currentPage == index ? 24 : 8,
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey.shade300,
+                      ? primaryColor
+                      : Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -102,21 +122,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Кнопка "Далее" или "Начать"
           ElevatedButton(
             onPressed: () {
-              if (_currentPage == _items.length - 1) {
+              if (isLastPage) {
                 _completeOnboarding();
               } else {
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeIn,
+                  curve: Curves.easeInOut,
                 );
               }
             },
             style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.black, // Цвет текста на кнопке
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: Text(
-              _currentPage == _items.length - 1 ? "Начать" : "Далее",
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: Text(
+                isLastPage ? "Начать" : "Далее",
+                key: ValueKey<String>(isLastPage ? "start" : "next"),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
