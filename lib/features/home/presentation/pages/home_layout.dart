@@ -66,9 +66,10 @@ class _HomeLayoutState extends State<HomeLayout> {
     return Scaffold(
       extendBody: true,
       backgroundColor: const Color(0xFF121212),
+      // Используем Stack для наложения элементов интерфейса поверх контента
       body: Stack(
         children: [
-          // Глобальный фон
+          // --- Слой 1: Фон и Контент ---
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -79,11 +80,9 @@ class _HomeLayoutState extends State<HomeLayout> {
             ),
           ),
 
-          // Декор
           Positioned(top: -100, right: -50, child: GlowOrb(color: colorScheme.primary.withOpacity(0.15))),
           Positioned(bottom: 100, left: -50, child: GlowOrb(color: Colors.blueAccent.withOpacity(0.1))),
 
-          // PageView
           PageView.builder(
             controller: _pageController,
             onPageChanged: _onPageChanged,
@@ -93,18 +92,37 @@ class _HomeLayoutState extends State<HomeLayout> {
               return _pages[realIndex];
             },
           ),
+
+          // --- Слой 2: Нижняя панель (стекло) ---
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 24,
+            child: _buildGlassBottomBar(colorScheme),
+          ),
+
+          // --- Слой 3: Центральная кнопка (парит над панелью) ---
+          Positioned(
+            bottom: 45, // Высота подобрана так, чтобы кнопка нависала над панелью
+            left: 0,
+            right: 0,
+            child: Center(
+              child: CenterActionButton(
+                onTap: () => _onTabTapped(2),
+                isSelected: _currentIndex == 2,
+              ),
+            ),
+          ),
         ],
       ),
-      bottomNavigationBar: _buildGlassBottomBar(colorScheme),
     );
   }
 
   Widget _buildGlassBottomBar(ColorScheme colorScheme) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       height: 70,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(35), // Более округлые края
         color: Colors.black.withOpacity(0.75),
         boxShadow: [
           BoxShadow(
@@ -116,9 +134,9 @@ class _HomeLayoutState extends State<HomeLayout> {
         border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(35),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), // Усиленный блюр
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -134,10 +152,10 @@ class _HomeLayoutState extends State<HomeLayout> {
                 isSelected: _currentIndex == 1,
                 onTap: () => _onTabTapped(1),
               ),
-              CenterActionButton(
-                onTap: () => _onTabTapped(2),
-                isSelected: _currentIndex == 2,
-              ),
+
+              // Пустое пространство под центральную кнопку
+              const SizedBox(width: 60),
+
               NavBarItem(
                 icon: Icons.emoji_events_outlined,
                 label: "Турниры",
