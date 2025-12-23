@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shesh/core/services/api_service.dart';
-import 'package:shesh/core/services/user_service.dart'; // Импорт UserService
-import 'package:shesh/features/game/presentation/game_board_screen.dart';
-import 'package:shesh/features/onboarding/presentation/pages/onboarding_screen.dart';
-import '../widgets/game_mode_card.dart';
-import '../widgets/quick_play_banner.dart';
+import 'package:shesh/core/services/user_service.dart';
 
 class LobbyView extends StatefulWidget {
   const LobbyView({super.key});
@@ -14,15 +10,12 @@ class LobbyView extends StatefulWidget {
 }
 
 class _LobbyViewState extends State<LobbyView> {
-  // Начальное значение берем из кэша, если есть, иначе "Загрузка..."
   String _username = UserService().currentUser?.login ?? "Загрузка...";
   final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    // Если по какой-то причине пользователя нет в памяти (например, горячий перезапуск),
-    // загружаем его
     if (!UserService().hasUser) {
       _loadUserProfile();
     }
@@ -31,9 +24,7 @@ class _LobbyViewState extends State<LobbyView> {
   Future<void> _loadUserProfile() async {
     try {
       final user = await _apiService.getMe();
-      // Обновляем кэш
       UserService().setUser(user);
-
       if (mounted && user.login != null) {
         setState(() {
           _username = user.login!;
@@ -41,27 +32,22 @@ class _LobbyViewState extends State<LobbyView> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _username = "Гость"; // Или показываем ошибку/кнопку повтора
-        });
+        setState(() => _username = "Гость");
       }
     }
   }
 
-  Future<void> _logout(BuildContext context) async {
-    await _apiService.logout();
-    UserService().clear(); // Чистим кэш пользователя
-    if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-          (route) => false,
+  void _onNotificationsTap() {
+    // TODO: Открыть экран уведомлений
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Нет новых уведомлений")),
     );
   }
 
-  void _navigateToGame() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const GameBoardScreen()),
+  void _onSettingsTap() {
+    // TODO: Открыть настройки или диалог выхода
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Настройки")),
     );
   }
 
@@ -70,15 +56,15 @@ class _LobbyViewState extends State<LobbyView> {
     final theme = Theme.of(context);
 
     return SafeArea(
-      child: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Хедер
+            // Верхняя панель
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Приветствие
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -97,68 +83,66 @@ class _LobbyViewState extends State<LobbyView> {
                     ),
                   ],
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.logout, size: 20),
-                    onPressed: () => _logout(context),
-                    tooltip: "Выйти",
-                  ),
+
+                // Кнопки действий (Уведомления и Настройки)
+                Row(
+                  children: [
+                    _buildActionButton(
+                      icon: Icons.notifications_none_rounded,
+                      onTap: _onNotificationsTap,
+                      theme: theme,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildActionButton(
+                      icon: Icons.settings_outlined, // Кнопка настроек
+                      onTap: _onSettingsTap,
+                      theme: theme,
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 32),
 
-            // Баннер быстрой игры
-            QuickPlayBanner(onTap: _navigateToGame),
+            // Пустое пространство (экран чист)
+            const Spacer(),
 
-            const SizedBox(height: 32),
-            const Text(
-              "Режимы игры",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Заглушка, чтобы экран не казался сломанным
+            Center(
+              child: Icon(
+                  Icons.grid_view_rounded,
+                  size: 64,
+                  color: Colors.white.withOpacity(0.05)
+              ),
             ),
-            const SizedBox(height: 16),
 
-            // Сетка режимов
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.3,
-              children: [
-                GameModeCard(
-                  title: "С компьютером",
-                  icon: Icons.computer,
-                  color: const Color(0xFF4A90E2),
-                  onTap: () {}, // TODO: Добавить навигацию
-                ),
-                GameModeCard(
-                  title: "С другом",
-                  icon: Icons.people_alt,
-                  color: const Color(0xFF50E3C2),
-                  onTap: () {},
-                ),
-                GameModeCard(
-                  title: "Турнир",
-                  icon: Icons.emoji_events,
-                  color: const Color(0xFF9013FE),
-                  onTap: () {},
-                ),
-                GameModeCard(
-                  title: "Обучение",
-                  icon: Icons.school,
-                  color: const Color(0xFFFF9F00),
-                  onTap: () {},
-                ),
-              ],
-            ),
+            const Spacer(),
           ],
         ),
+      ),
+    );
+  }
+
+  // Вспомогательный метод для создания кнопок в едином стиле
+  Widget _buildActionButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.05),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        icon: Icon(icon, size: 22, color: Colors.white),
+        onPressed: onTap,
       ),
     );
   }
