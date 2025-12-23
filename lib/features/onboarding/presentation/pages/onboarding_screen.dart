@@ -16,32 +16,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
   final LocalStorageService _storageService = LocalStorageService();
 
-  // Данные для 3-х экранов
+  // Данные для экранов (картинки убраны)
   final List<OnboardingItem> _items = [
     OnboardingItem(
       title: "Добро пожаловать",
-      description: "Это первый экран вашей презентации. Расскажите о главной ценности приложения.",
-      imagePath: "assets/slide1.png",
+      description: "Это стартовый шаблон клиентского приложения.",
+      imagePath: "", // Пустая строка - покажется заглушка-иконка
     ),
     OnboardingItem(
-      title: "Удобный функционал",
-      description: "Второй экран. Объясните пользователю, как пользоваться основными фичами.",
-      imagePath: "assets/slide2.png",
+      title: "Чистый интерфейс",
+      description: "Ничего лишнего. Готовая база для разработки вашего функционала.",
+      imagePath: "",
     ),
     OnboardingItem(
-      title: "Начнем!",
-      description: "Третий экран. Призыв к действию и переход к основному приложению.",
-      imagePath: "assets/slide3.png",
+      title: "Поехали",
+      description: "Авторизуйтесь, чтобы начать работу с клиентом.",
+      imagePath: "",
     ),
   ];
 
   Future<void> _completeOnboarding() async {
-    // Сохраняем флаг, что презентация просмотрена
     await _storageService.setOnboardingSeen();
 
     if (!mounted) return;
 
-    // Переход на WelcomeScreen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const WelcomeScreen()),
     );
@@ -50,12 +48,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar нужен для кнопки "Пропустить"
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // Показываем кнопку "Пропустить" только если это не последний слайд
           if (_currentPage != _items.length - 1)
             TextButton(
               onPressed: _completeOnboarding,
@@ -66,7 +62,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
         ],
       ),
-      // Расширяем тело за AppBar
       extendBodyBehindAppBar: true,
       body: SafeArea(
         child: Column(
@@ -101,7 +96,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Индикатор страниц (точки)
           Row(
             children: List.generate(
               _items.length,
@@ -119,7 +113,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ),
-          // Кнопка "Далее" или "Начать"
           ElevatedButton(
             onPressed: () {
               if (isLastPage) {
@@ -133,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
-              foregroundColor: Colors.black, // Цвет текста на кнопке
+              foregroundColor: Colors.black,
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),

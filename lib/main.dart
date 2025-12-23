@@ -21,15 +21,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Shesh Backgammon',
+      title: 'SHESH',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-
-      // Используем тему из вашего файла core/theme/app_theme.dart
       darkTheme: AppTheme.darkTheme,
-
-      // Теперь всегда стартуем со сплэш-экрана,
-      // который сам решит, куда направить пользователя
       home: const SplashScreen(),
     );
   }

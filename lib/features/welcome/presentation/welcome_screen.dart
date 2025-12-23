@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shesh/features/home/presentation/pages/home_layout.dart'; // Изменен импорт
+import 'package:shesh/features/home/presentation/pages/home_layout.dart';
 import 'package:shesh/core/services/local_storage_service.dart';
 import 'package:shesh/core/services/api_service.dart';
 import 'package:shesh/features/auth/presentation/pages/login_screen.dart';
@@ -78,13 +78,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.2), blurRadius: 20, spreadRadius: 5)
                         ],
                       ),
-                      child: const Icon(Icons.casino, size: 60, color: Color(0xFFD4AF37)),
+                      // Нейтральная иконка
+                      child: const Icon(Icons.dashboard_customize, size: 60, color: Color(0xFFD4AF37)),
                     ),
                   ),
                   const SizedBox(height: 40),
-                  const Text("SHESH", textAlign: TextAlign.center, style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, letterSpacing: 8, color: Colors.white)),
+                  const Text("SHESH", textAlign: TextAlign.center, style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.white)),
                   const SizedBox(height: 8),
-                  Text("Искусство стратегии", textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.7), letterSpacing: 1.5)),
+                  Text("Еби всех братишка", textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.7), letterSpacing: 1.5)),
                   const Spacer(flex: 3),
                   ElevatedButton(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
@@ -101,7 +102,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ? const CircularProgressIndicator(color: Color(0xFFD4AF37))
                         : TextButton(
                       onPressed: () => _loginAsGuest(context),
-                      child: Text("Играть как Гость", style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                      child: Text("Продолжить как Гость", style: TextStyle(color: Colors.white.withOpacity(0.5))),
                     ),
                   ),
                   const SizedBox(height: 20),

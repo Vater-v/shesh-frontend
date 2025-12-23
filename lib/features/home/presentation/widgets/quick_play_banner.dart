@@ -36,7 +36,7 @@ class QuickPlayBanner extends StatelessWidget {
               right: -30,
               bottom: -30,
               child: Icon(
-                Icons.casino,
+                Icons.rocket_launch, // Нейтральная иконка запуска
                 size: 200,
                 color: Colors.white.withOpacity(0.2),
               ),
@@ -64,7 +64,7 @@ class QuickPlayBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "БЫСТРАЯ ИГРА",
+                    "НАЧАТЬ",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
@@ -72,7 +72,7 @@ class QuickPlayBanner extends StatelessWidget {
                     ),
                   ),
                   const Text(
-                    "Рейтинговый матч",
+                    "Основное действие",
                     style: TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ],
