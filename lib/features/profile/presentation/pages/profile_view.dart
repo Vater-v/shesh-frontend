@@ -11,94 +11,129 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  // Состояние для блокировки кнопки выхода
+  bool _isLoggingOut = false;
 
-  // Диалог сохранения гостя
+  // Диалог сохранения гостя с локальным состоянием загрузки
   Future<void> _showUpgradeDialog() async {
     final loginCtrl = TextEditingController();
     final passCtrl = TextEditingController();
 
+    // Переменная для отслеживания загрузки внутри диалога
+    bool isDialogLoading = false;
+
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text("Сохранить прогресс", style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Придумайте логин и пароль, чтобы не потерять статистику при выходе.",
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+      barrierDismissible: false, // Запрещаем закрытие тапом мимо во время процесса
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E1E1E),
+            title: const Text("Сохранить прогресс", style: TextStyle(color: Colors.white)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Придумайте логин и пароль, чтобы не потерять статистику при выходе.",
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: loginCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: "Логин",
+                    labelStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                  ),
+                ),
+                TextField(
+                  controller: passCtrl,
+                  obscureText: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: "Пароль",
+                    labelStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: loginCtrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: "Логин",
-                labelStyle: TextStyle(color: Colors.white54),
-                prefixIcon: Icon(Icons.person, color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+            actions: [
+              TextButton(
+                // Блокируем кнопку отмены во время загрузки
+                onPressed: isDialogLoading ? null : () => Navigator.pop(ctx),
+                child: const Text("Отмена"),
               ),
-            ),
-            TextField(
-              controller: passCtrl,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: "Пароль",
-                labelStyle: TextStyle(color: Colors.white54),
-                prefixIcon: Icon(Icons.lock, color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Отмена"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                // Вызываем новый метод API
-                final newUser = await ApiService().upgradeGuest(loginCtrl.text, passCtrl.text);
-                UserService().setUser(newUser); // Обновляем состояние приложения
+              ElevatedButton(
+                // Если идет загрузка - кнопка неактивна
+                onPressed: isDialogLoading
+                    ? null
+                    : () async {
+                  // Обновляем состояние ТОЛЬКО диалога
+                  setDialogState(() => isDialogLoading = true);
 
-                if (mounted) {
-                  Navigator.pop(ctx); // Закрываем диалог
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Аккаунт успешно сохранен!"), backgroundColor: Colors.green),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Ошибка: $e"), backgroundColor: Colors.red),
-                  );
-                }
-              }
-            },
-            child: const Text("Сохранить"),
-          )
-        ],
+                  try {
+                    final newUser = await ApiService().upgradeGuest(loginCtrl.text, passCtrl.text);
+                    UserService().setUser(newUser); // Обновляем данные пользователя
+
+                    if (mounted) {
+                      Navigator.pop(ctx); // Закрываем диалог
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Аккаунт успешно сохранен!"), backgroundColor: Colors.green),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Ошибка: $e"), backgroundColor: Colors.red),
+                      );
+                      // Сбрасываем загрузку при ошибке, чтобы можно было попробовать снова
+                      setDialogState(() => isDialogLoading = false);
+                    }
+                  }
+                },
+                // Меняем текст на индикатор загрузки
+                child: isDialogLoading
+                    ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                )
+                    : const Text("Сохранить"),
+              )
+            ],
+          );
+        },
       ),
     );
   }
 
   Future<void> _logout(BuildContext context) async {
-    await ApiService().logout();
-    UserService().clear(); // Чистим кэш пользователя
-    if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-          (route) => false,
-    );
+    // Блокируем интерфейс
+    setState(() => _isLoggingOut = true);
+
+    try {
+      await ApiService().logout();
+    } catch (e) {
+      // Игнорируем ошибки сети при выходе, все равно удаляем токен локально
+      debugPrint("Logout error: $e");
+    } finally {
+      UserService().clear(); // Чистим кэш пользователя
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+              (route) => false,
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Используем ListenableBuilder, чтобы экран обновлялся при смене статуса Guest -> User
     return ListenableBuilder(
       listenable: UserService(),
       builder: (context, _) {
@@ -175,7 +210,6 @@ class _ProfileViewState extends State<ProfileView> {
 
                 const SizedBox(height: 40),
 
-                // Если гость - показываем кнопку сохранения первым пунктом
                 if (isGuest)
                   _buildSettingsItem(Icons.save_as, "Сохранить аккаунт", onTap: _showUpgradeDialog),
 
@@ -183,7 +217,17 @@ class _ProfileViewState extends State<ProfileView> {
                 _buildSettingsItem(Icons.language, "Язык"),
                 _buildSettingsItem(Icons.help_outline, "Помощь"),
                 const Divider(color: Colors.white10, height: 30),
-                _buildSettingsItem(Icons.logout, "Выйти", isDestructive: true, onTap: () => _logout(context)),
+
+                // Пункт выхода с индикацией загрузки
+                _buildSettingsItem(
+                    Icons.logout,
+                    _isLoggingOut ? "Выход..." : "Выйти",
+                    isDestructive: true,
+                    onTap: _isLoggingOut ? null : () => _logout(context),
+                    trailing: _isLoggingOut
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.redAccent))
+                        : null
+                ),
 
                 const SizedBox(height: 100),
               ],
@@ -194,7 +238,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildSettingsItem(IconData icon, String title, {bool isDestructive = false, VoidCallback? onTap}) {
+  Widget _buildSettingsItem(IconData icon, String title, {bool isDestructive = false, VoidCallback? onTap, Widget? trailing}) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
@@ -208,8 +252,9 @@ class _ProfileViewState extends State<ProfileView> {
           color: isDestructive ? Colors.redAccent : Colors.white,
           fontWeight: FontWeight.w500
       )),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white24),
-      onTap: onTap ?? () {},
+      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white24),
+      onTap: onTap,
+      enabled: onTap != null, // Визуально отключает нажатие, если null
       contentPadding: const EdgeInsets.symmetric(vertical: 4),
     );
   }
