@@ -1,5 +1,5 @@
-name: shesh
-description: "The Shesh Frontend"
+name: SHESH
+description: "SHESH it, all on the floor."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -12,7 +12,8 @@ dependencies:
         sdk: flutter
     cupertino_icons: ^1.0.8
     shared_preferences: ^2.2.2
-    dio: ^5.4.0 # Добавлено для сетевых запросов
+    dio: ^5.4.0
+    device_apps_plus: ^1.0.2
 
 dev_dependencies:
     flutter_test:

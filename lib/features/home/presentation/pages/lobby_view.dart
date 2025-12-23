@@ -1,15 +1,22 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shesh/core/services/api_service.dart';
 import 'package:shesh/core/services/user_service.dart';
+// Импорты для работы с пакетами
+import 'package:device_apps_plus/device_apps_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-// Модель для элемента списка (можно вынести в отдельный файл models/lobby_module.dart)
+// Модель модуля
 class LobbyModule {
   final String id;
   final String title;
   final String subtitle;
   final IconData icon;
   final Color iconColor;
+  final String? packageName;
+  final bool isSoon;
   bool isEnabled;
+  bool isInstalled; // Новое поле для кэширования статуса установки
 
   LobbyModule({
     required this.id,
@@ -17,7 +24,10 @@ class LobbyModule {
     required this.subtitle,
     required this.icon,
     required this.iconColor,
+    this.packageName,
+    this.isSoon = false,
     this.isEnabled = false,
+    this.isInstalled = false,
   });
 }
 
@@ -28,55 +38,75 @@ class LobbyView extends StatefulWidget {
   State<LobbyView> createState() => _LobbyViewState();
 }
 
-class _LobbyViewState extends State<LobbyView> {
+class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   String _username = UserService().currentUser?.login ?? "Загрузка...";
-
-  // Имитация данных баланса (пока нет в API)
   final int _fuelBalance = 1450;
 
-  // Состояние списка модулей
-  final List<LobbyModule> _modules = [
-    LobbyModule(
-      id: '1',
-      title: 'Aim Assist',
-      subtitle: 'Автоматическая наводка на цель',
-      icon: Icons.gps_fixed,
-      iconColor: Colors.redAccent,
-      isEnabled: true,
-    ),
-    LobbyModule(
-      id: '2',
-      title: 'Wallhack',
-      subtitle: 'Видимость сквозь препятствия',
-      icon: Icons.visibility,
-      iconColor: Colors.cyanAccent,
-      isEnabled: false,
-    ),
-    LobbyModule(
-      id: '3',
-      title: 'Skin Changer',
-      subtitle: 'Визуальная замена моделей',
-      icon: Icons.palette,
-      iconColor: Colors.purpleAccent,
-      isEnabled: true,
-    ),
-    LobbyModule(
-      id: '4',
-      title: 'Bunny Hop',
-      subtitle: 'Автоматическая распрыжка',
-      icon: Icons.directions_run,
-      iconColor: Colors.orangeAccent,
-      isEnabled: false,
-    ),
-  ];
+  late List<LobbyModule> _modules;
+  bool _isLoadingStatus = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (!UserService().hasUser) {
       _loadUserProfile();
     }
+    _initModules();
+    _checkAllPackagesStatus(); // Проверяем статус при старте
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Перепроверяем статус при возврате в приложение (например, после установки из Play Market)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkAllPackagesStatus();
+    }
+  }
+
+  void _initModules() {
+    _modules = [
+      LobbyModule(
+        id: '1',
+        title: 'PPNards',
+        subtitle: 'Классические нарды',
+        icon: Icons.games_outlined,
+        iconColor: const Color(0xFFD4AF37),
+        packageName: 'com.ObviousChoice.PPBackgammon',
+        isEnabled: false, // По умолчанию выключено
+      ),
+      LobbyModule(
+        id: '2',
+        title: 'Backgammon',
+        subtitle: 'Скоро',
+        icon: Icons.hourglass_empty_rounded,
+        iconColor: Colors.grey,
+        isSoon: true,
+      ),
+      LobbyModule(
+        id: '3',
+        title: 'Poker',
+        subtitle: 'Скоро',
+        icon: Icons.lock_outline_rounded,
+        iconColor: Colors.white12,
+        isSoon: true,
+      ),
+      LobbyModule(
+        id: '4',
+        title: 'Durak',
+        subtitle: 'Скоро',
+        icon: Icons.lock_outline_rounded,
+        iconColor: Colors.white12,
+        isSoon: true,
+      ),
+    ];
   }
 
   Future<void> _loadUserProfile() async {
@@ -95,62 +125,117 @@ class _LobbyViewState extends State<LobbyView> {
     }
   }
 
+  // Проверка статуса установки для всех модулей
+  Future<void> _checkAllPackagesStatus() async {
+    if (!Platform.isAndroid) return;
+
+    for (var module in _modules) {
+      if (module.packageName != null) {
+        try {
+          bool installed = await DeviceAppsPlus().isAppInstalled(module.packageName!);
+          module.isInstalled = installed;
+        } catch (e) {
+          debugPrint("Ошибка проверки пакета ${module.packageName}: $e");
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoadingStatus = false;
+      });
+    }
+  }
+
+  // Логика переключения (Radio button behavior)
   void _onToggleModule(int index, bool value) {
+    if (_modules[index].isSoon) return;
+
     setState(() {
-      _modules[index].isEnabled = value;
+      for (int i = 0; i < _modules.length; i++) {
+        // Если нажали на текущий - включаем/выключаем, остальные выключаем
+        if (i == index) {
+          _modules[i].isEnabled = value;
+        } else {
+          _modules[i].isEnabled = false;
+        }
+      }
     });
-    // Тут можно отправить запрос на API для сохранения состояния
+  }
+
+  // Запуск приложения
+  Future<void> _launchGame(String packageName) async {
+    if (Platform.isAndroid) {
+      try {
+        await DeviceAppsPlus().openApp(packageName);
+      } catch (e) {
+        _showSnack("Не удалось запустить приложение");
+      }
+    } else {
+      _showSnack("Запуск работает только на Android");
+    }
+  }
+
+  // Скачивание (переход в магазин)
+  Future<void> _downloadGame(String packageName) async {
+    final url = Uri.parse("https://play.google.com/store/apps/details?id=$packageName");
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        _showSnack("Не удалось открыть магазин");
+      }
+    } catch (e) {
+      _showSnack("Ошибка при открытии ссылки");
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Отступ снизу, чтобы контент не перекрывался нижним меню (NavBar)
+    // Отступ снизу для навигации
     const double bottomNavBarHeight = 100.0;
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Фон берется из HomeLayout
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
-
-            // 1. Верхняя панель пользователя
+            // Хедер профиля
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: _UserHeader(
                 username: _username,
                 isGuest: UserService().isGuest,
-                onSettingsTap: () => _showSnackBar("Настройки"),
-                onNotificationsTap: () => _showSnackBar("Уведомления"),
+                onSettingsTap: () => _showSnack("Настройки"),
+                onNotificationsTap: () => _showSnack("Уведомления"),
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // 2. Баланс Fuel
+            // Баланс
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: _FuelCard(balance: _fuelBalance),
             ),
-
             const SizedBox(height: 24),
-
-            // 3. Панель с элементами (Scrollable)
+            // Список модулей
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF1E1E1E), // Темный фон панели
+                  color: Color(0xFF1E1E1E),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, -5),
-                    )
+                    BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, -5))
                   ],
                 ),
                 child: ClipRRect(
@@ -161,12 +246,9 @@ class _LobbyViewState extends State<LobbyView> {
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, bottomNavBarHeight),
                     itemCount: _modules.length,
-                    separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 24),
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
-                      return _ModuleItem(
-                        module: _modules[index],
-                        onChanged: (val) => _onToggleModule(index, val),
-                      );
+                      return _buildModuleCard(_modules[index], index);
                     },
                   ),
                 ),
@@ -178,16 +260,170 @@ class _LobbyViewState extends State<LobbyView> {
     );
   }
 
-  void _showSnackBar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(text),
-      duration: const Duration(seconds: 1),
-      behavior: SnackBarBehavior.floating,
-    ));
+  Widget _buildModuleCard(LobbyModule module, int index) {
+    final bool isActive = module.isEnabled;
+    final bool isSoon = module.isSoon;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isActive
+            ? const Color(0xFFD4AF37).withOpacity(0.05) // Легкий золотой фон для активного
+            : Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isActive
+              ? const Color(0xFFD4AF37).withOpacity(0.6)
+              : Colors.white.withOpacity(0.05),
+          width: isActive ? 1.5 : 1,
+        ),
+        boxShadow: isActive ? [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withOpacity(0.1),
+            blurRadius: 12,
+            spreadRadius: 2,
+          )
+        ] : [],
+      ),
+      child: Column(
+        children: [
+          // Верхняя часть карточки
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                // Иконка
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isSoon
+                        ? Colors.black26
+                        : module.iconColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                      module.icon,
+                      color: isSoon ? Colors.white24 : module.iconColor,
+                      size: 26
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Тексты
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            module.title.isEmpty ? "Unknown" : module.title,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: isSoon
+                                  ? Colors.white38
+                                  : (isActive ? Colors.white : Colors.white70),
+                            ),
+                          ),
+                          // Галочка если установлено
+                          if (module.isInstalled && !isSoon) ...[
+                            const SizedBox(width: 6),
+                            const Icon(Icons.check_circle, color: Colors.green, size: 14),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        module.subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isSoon
+                              ? const Color(0xFFD4AF37).withOpacity(0.7)
+                              : Colors.white38,
+                          fontWeight: isSoon ? FontWeight.w500 : FontWeight.normal,
+                          fontStyle: isSoon ? FontStyle.italic : FontStyle.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Свитч (Тумблер)
+                if (!isSoon)
+                  Transform.scale(
+                    scale: 0.9,
+                    child: Switch(
+                      value: isActive,
+                      onChanged: (val) => _onToggleModule(index, val),
+                      activeColor: Colors.black,
+                      activeTrackColor: const Color(0xFFD4AF37),
+                      inactiveThumbColor: Colors.grey.shade400,
+                      inactiveTrackColor: Colors.white10,
+                    ),
+                  )
+                else
+                  Icon(Icons.lock, color: Colors.white.withOpacity(0.1), size: 20),
+              ],
+            ),
+          ),
+
+          // Нижняя панель действий (появляется если модуль активен)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isActive
+                ? Column(
+              children: [
+                Divider(height: 1, color: const Color(0xFFD4AF37).withOpacity(0.2)),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: module.isInstalled
+                      ? SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _launchGame(module.packageName!),
+                      icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                      label: const Text("ИГРАТЬ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  )
+                      : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _downloadGame(module.packageName!),
+                      icon: const Icon(Icons.download_rounded, size: 24),
+                      label: const Text("СКАЧАТЬ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4AF37),
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-// --- Компоненты UI (Private Widgets) ---
+// --- Приватные виджеты (без изменений) ---
 
 class _UserHeader extends StatelessWidget {
   final String username;
@@ -206,7 +442,6 @@ class _UserHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Аватар
         Container(
           width: 50,
           height: 50,
@@ -214,29 +449,22 @@ class _UserHeader extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: const Color(0xFFD4AF37), width: 2),
             image: const DecorationImage(
-              // Плейсхолдер аватара
               image: AssetImage('assets/images/avatar_placeholder.png'),
-              // Если нет ассета, используем иконку ниже в child,
-              // но для примера оставим структуру
+              fit: BoxFit.cover,
             ),
             color: const Color(0xFF2C2C2C),
           ),
+          // Fallback если картинки нет
           child: const Icon(Icons.person, color: Colors.white70),
         ),
         const SizedBox(width: 12),
-
-        // Ник и Статус
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 username,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -262,8 +490,6 @@ class _UserHeader extends StatelessWidget {
             ],
           ),
         ),
-
-        // Кнопки действий
         _ActionButton(icon: Icons.notifications_none_rounded, onTap: onNotificationsTap),
         const SizedBox(width: 8),
         _ActionButton(icon: Icons.settings_outlined, onTap: onSettingsTap),
@@ -298,7 +524,6 @@ class _ActionButton extends StatelessWidget {
 
 class _FuelCard extends StatelessWidget {
   final int balance;
-
   const _FuelCard({required this.balance});
 
   @override
@@ -351,7 +576,7 @@ class _FuelCard extends StatelessWidget {
                       fontSize: 26,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
-                      fontFamily: 'monospace', // Моноширинный шрифт для цифр
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],
@@ -370,86 +595,6 @@ class _FuelCard extends StatelessWidget {
             child: const Icon(Icons.add, size: 20),
           )
         ],
-      ),
-    );
-  }
-}
-
-class _ModuleItem extends StatelessWidget {
-  final LobbyModule module;
-  final ValueChanged<bool> onChanged;
-
-  const _ModuleItem({required this.module, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: module.isEnabled
-              ? const Color(0xFFD4AF37).withOpacity(0.3)
-              : Colors.transparent,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            // Картинка/Иконка элемента
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: module.iconColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(module.icon, color: module.iconColor, size: 24),
-            ),
-            const SizedBox(width: 16),
-
-            // Заголовок и подзаголовок
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    module.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: module.isEnabled ? Colors.white : Colors.white70,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    module.subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.4),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-
-            // Тумблер
-            Transform.scale(
-              scale: 0.8,
-              child: Switch(
-                value: module.isEnabled,
-                onChanged: onChanged,
-                activeColor: const Color(0xFFD4AF37),
-                activeTrackColor: const Color(0xFFD4AF37).withOpacity(0.3),
-                inactiveThumbColor: Colors.grey,
-                inactiveTrackColor: Colors.grey.withOpacity(0.2),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
