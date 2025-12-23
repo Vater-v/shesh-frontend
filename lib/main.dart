@@ -3,6 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:shesh/core/services/local_storage_service.dart';
 import 'package:shesh/core/theme/app_theme.dart';
 import 'package:shesh/features/splash/presentation/splash_screen.dart';
+// Импорт виджета оверлея
+import 'package:shesh/features/home/presentation/widgets/overlay_widget.dart';
+
+// Точка входа для оверлея (запускается Android-ом в отдельном процессе)
+@pragma("vm:entry-point")
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MyOverlayWidget(),
+    ),
+  );
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

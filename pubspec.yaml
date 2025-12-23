@@ -15,6 +15,7 @@ dependencies:
     dio: ^5.4.0
     device_apps_plus: ^1.0.2
     url_launcher: ^6.2.4
+    flutter_overlay_window: ^0.5.0
 
 dev_dependencies:
     flutter_test:

@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shesh/core/services/api_service.dart';
 import 'package:shesh/core/services/user_service.dart';
-// Импорты для работы с пакетами
 import 'package:device_apps_plus/device_apps_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+// Импорт для управления оверлеем
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
-// Модель модуля
 class LobbyModule {
   final String id;
   final String title;
@@ -16,7 +16,7 @@ class LobbyModule {
   final String? packageName;
   final bool isSoon;
   bool isEnabled;
-  bool isInstalled; // Новое поле для кэширования статуса установки
+  bool isInstalled;
 
   LobbyModule({
     required this.id,
@@ -54,7 +54,7 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
       _loadUserProfile();
     }
     _initModules();
-    _checkAllPackagesStatus(); // Проверяем статус при старте
+    _checkAllPackagesStatus();
   }
 
   @override
@@ -63,7 +63,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // Перепроверяем статус при возврате в приложение (например, после установки из Play Market)
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -80,7 +79,7 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
         icon: Icons.games_outlined,
         iconColor: const Color(0xFFD4AF37),
         packageName: 'com.ObviousChoice.PPBackgammon',
-        isEnabled: false, // По умолчанию выключено
+        isEnabled: false,
       ),
       LobbyModule(
         id: '2',
@@ -125,7 +124,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
     }
   }
 
-  // Проверка статуса установки для всех модулей
   Future<void> _checkAllPackagesStatus() async {
     if (!Platform.isAndroid) return;
 
@@ -147,13 +145,25 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
     }
   }
 
-  // Логика переключения (Radio button behavior)
-  void _onToggleModule(int index, bool value) {
+  // --- ЛОГИКА ОВЕРЛЕЯ ---
+  Future<void> _onToggleModule(int index, bool value) async {
     if (_modules[index].isSoon) return;
+
+    // Если пытаемся включить модуль - проверяем права
+    if (value) {
+      final bool status = await FlutterOverlayWindow.isPermissionGranted();
+      if (!status) {
+        // Запрашиваем права
+        final bool? boolResult = await FlutterOverlayWindow.requestPermission();
+        if (boolResult != true) {
+          _showSnack("Необходимо разрешение для отображения поверх окон");
+          return; // Не включаем тумблер, если прав нет
+        }
+      }
+    }
 
     setState(() {
       for (int i = 0; i < _modules.length; i++) {
-        // Если нажали на текущий - включаем/выключаем, остальные выключаем
         if (i == index) {
           _modules[i].isEnabled = value;
         } else {
@@ -161,9 +171,33 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
         }
       }
     });
+
+    // Управление отображением оверлея
+    try {
+      if (value) {
+        // Если уже активен, не переоткрываем (или можно закрыть и открыть новый)
+        if (await FlutterOverlayWindow.isActive()) return;
+
+        await FlutterOverlayWindow.showOverlay(
+          enableDrag: true,
+          overlayTitle: "Shesh Helper",
+          overlayContent: "Helper active",
+          flag: OverlayFlag.defaultFlag,
+          alignment: OverlayAlignment.centerLeft,
+          visibility: NotificationVisibility.visibilityPublic,
+          positionGravity: PositionGravity.auto,
+          height: 300, // Высота области оверлея (лучше делать компактным)
+          width: 300,
+        );
+      } else {
+        // Если выключили - закрываем
+        await FlutterOverlayWindow.closeOverlay();
+      }
+    } catch (e) {
+      debugPrint("Overlay error: $e");
+    }
   }
 
-  // Запуск приложения
   Future<void> _launchGame(String packageName) async {
     if (Platform.isAndroid) {
       try {
@@ -176,7 +210,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
     }
   }
 
-  // Скачивание (переход в магазин)
   Future<void> _downloadGame(String packageName) async {
     final url = Uri.parse("https://play.google.com/store/apps/details?id=$packageName");
     try {
@@ -198,7 +231,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // Отступ снизу для навигации
     const double bottomNavBarHeight = 100.0;
 
     return Scaffold(
@@ -207,7 +239,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // Хедер профиля
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: _UserHeader(
@@ -218,13 +249,11 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
               ),
             ),
             const SizedBox(height: 24),
-            // Баланс
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: _FuelCard(balance: _fuelBalance),
             ),
             const SizedBox(height: 24),
-            // Список модулей
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -269,7 +298,7 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
         color: isActive
-            ? const Color(0xFFD4AF37).withOpacity(0.05) // Легкий золотой фон для активного
+            ? const Color(0xFFD4AF37).withOpacity(0.05)
             : Colors.white.withOpacity(0.03),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
@@ -288,12 +317,10 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
       ),
       child: Column(
         children: [
-          // Верхняя часть карточки
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                // Иконка
                 Container(
                   width: 52,
                   height: 52,
@@ -310,8 +337,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
                   ),
                 ),
                 const SizedBox(width: 16),
-
-                // Тексты
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +353,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
                                   : (isActive ? Colors.white : Colors.white70),
                             ),
                           ),
-                          // Галочка если установлено
                           if (module.isInstalled && !isSoon) ...[
                             const SizedBox(width: 6),
                             const Icon(Icons.check_circle, color: Colors.green, size: 14),
@@ -350,8 +374,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
-
-                // Свитч (Тумблер)
                 if (!isSoon)
                   Transform.scale(
                     scale: 0.9,
@@ -369,8 +391,6 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
               ],
             ),
           ),
-
-          // Нижняя панель действий (появляется если модуль активен)
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -423,8 +443,9 @@ class _LobbyViewState extends State<LobbyView> with WidgetsBindingObserver {
   }
 }
 
-// --- Приватные виджеты (без изменений) ---
-
+// Приватные виджеты (_UserHeader, _ActionButton, _FuelCard) остаются без изменений
+// скопируйте их из старого файла, если нужно, или они подтянутся, если они в том же файле
+// (Я их не включал сюда повторно для краткости, так как они не менялись, но они должны быть в файле).
 class _UserHeader extends StatelessWidget {
   final String username;
   final bool isGuest;
@@ -454,7 +475,6 @@ class _UserHeader extends StatelessWidget {
             ),
             color: const Color(0xFF2C2C2C),
           ),
-          // Fallback если картинки нет
           child: const Icon(Icons.person, color: Colors.white70),
         ),
         const SizedBox(width: 12),
